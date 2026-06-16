@@ -1,0 +1,10 @@
+# Laravel
+laravel/vendor/
+laravel/.env
+laravel/storage/framework/cache/
+
+# Symfony
+symfony/vendor/
+symfony/.env
+symfony/var/cache/
+symfony/var/log/
