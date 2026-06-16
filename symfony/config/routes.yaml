@@ -10,7 +10,7 @@
 controllers:
     resource: routing.controllers
 
-get_planes_manual:
-    path: /api/planes
-    controller: App\Controller\PlaneController::index
+get_categories_manual:
+    path: /api/categories
+    controller: App\Controller\CategoryController::index
     methods: [GET]
