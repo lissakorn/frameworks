@@ -28,6 +28,101 @@
         "description": "# Get Categories\n\nRetrieves a complete list of all category resources stored in the database. This is a **read-only** endpoint — it does not create, modify, or delete any data. The response is a JSON array where each element represents one category object.\n\n---\n\n## Endpoint\n\n| Property | Value |\n| --- | --- |\n| **Method** | `GET` |\n| **URL** | `http://127.0.0.1:8000/api/categories` |\n| **Authentication** | None required |\n| **Request Body** | None |\n| **Idempotent** | Yes — calling this endpoint multiple times always returns the same result without side effects |\n\n---\n\n## Required Request Headers\n\nThe following headers must be included with every request to this endpoint.\n\n| Header | Value | Required | Purpose |\n| --- | --- | --- | --- |\n| `Accept` | `application/json` | **Yes** | Instructs the server to return the response as JSON. Without this header, Symfony may return an HTML page instead of structured data — especially for error responses like 404 and 500. |\n\n**How to add this header in Postman:**\n\n1. Open this request in Postman.\n2. Click the **Headers** tab (next to Params, Authorization, Body).\n3. In an empty row, enter:\n   - **Key:** `Accept`\n   - **Value:** `application/json`\n4. Make sure the checkbox on the left side of the row is **checked** (enabled).\n5. Click **Send**.\n\n> `Content-Type` is **not** required for this request because `GET` requests do not have a request body. Only include `Content-Type: application/json` on requests that send a body (POST, PUT, PATCH).\n\n---\n\n## Query Parameters\n\nThis endpoint does not accept any query parameters. The full list of categories is always returned. Filtering, sorting, and pagination are not currently implemented.\n\n| Parameter | Type | Required | Description |\n| --- | --- | --- | --- |\n| *(none)* | — | — | No query parameters are supported |\n\n---\n\n## JSON Response Structure\n\nA successful `200 OK` response returns a **JSON array** at the top level. Each element of the array is a **category object**.\n\n### Category Object Fields\n\n| Field | Type | Nullable | Description |\n| --- | --- | --- | --- |\n| `id` | `integer` | No | The unique numeric identifier for this category. Auto-assigned by the database. Immutable after creation. |\n| `name` | `string` | No | The human-readable display name of the category. UTF-8 encoded. |\n\n### `id` — Detailed Explanation\n\n- **Type:** Positive integer (e.g., `1`, `7`, `42`)\n- **Assigned by:** The database engine automatically, using an auto-increment primary key\n- **Immutable:** Yes — this value is set once at creation and never changes, even if the category's `name` is updated\n- **Unique:** Guaranteed to be unique across all category records\n- **Never zero or negative** in a real database\n- **Primary use:** Reference this value when building URLs for single-resource endpoints, e.g.:\n  ```\n  GET /api/categories/1\n  PUT /api/categories/1\n  DELETE /api/categories/1\n  ```\n- **In your front-end:** Store this value as the key in dropdowns, lists, and state management so you can identify which category the user selected\n\n### `name` — Detailed Explanation\n\n- **Type:** UTF-8 string\n- **Set by:** The application when a category is created or updated\n- **Mutable:** Yes — can be changed via `PUT` or `PATCH` endpoints\n- **Uniqueness:** Not guaranteed at the API level (depends on database constraints)\n- **May contain:** Spaces, punctuation, accented characters, Unicode (e.g., `\"Électronique\"`, `\"Bücher\"`, `\"Категорія\"`)\n- **Primary use:** Display to end users in navigation menus, filter dropdowns, product listings, etc.\n\n### Full Response Example (with data)\n\n```json\n[\n  {\n    \"id\": 1,\n    \"name\": \"Electronics\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Books\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Clothing\"\n  },\n  {\n    \"id\": 4,\n    \"name\": \"Home & Garden\"\n  }\n]\n```\n\n### Empty Response Example\n\n```json\n[]\n```\n\nAn empty array is a **valid, successful response**. It means the `categories` table in the database exists but contains no rows. The HTTP status code will still be `200 OK`. This is not an error — do not treat it as one in your application code.\n\n---\n\n## HTTP Status Codes\n\n### 200 OK\n\n| Property | Value |\n| --- | --- |\n| **Code** | `200` |\n| **Meaning** | Request succeeded. The server queried the database and returned the result. |\n| **When you see it** | The Symfony server is running, the database is reachable, and the route is correctly registered |\n\n**Example response:**\n```json\n[\n  { \"id\": 1, \"name\": \"Electronics\" },\n  { \"id\": 2, \"name\": \"Books\" }\n]\n```\n\n**What to do:** Read the array and use the data. If the array is empty (`[]`), it means no categories have been created yet — this is still a success.\n\n---\n\n### 404 Not Found\n\n| Property | Value |\n| --- | --- |\n| **Code** | `404` |\n| **Meaning** | The URL you requested does not match any route registered in Symfony |\n| **When you see it** | URL typo, wrong path, or Symfony route cache is stale |\n\n**Common causes for this endpoint:**\n- Typing `/api/category` instead of `/api/categories` (missing the `s`)\n- Typing `/api/Categories` (wrong case — URLs are case-sensitive)\n- The Symfony server is running but the route was not registered (missing annotation/attribute or YAML config)\n- The route cache is outdated after a code change\n\n**Example response body (when `Accept: application/json` is set):**\n```json\n{\n  \"type\": \"https://tools.ietf.org/html/rfc2616#section-10\",\n  \"title\": \"An error occurred\",\n  \"detail\": \"No route found for \\\"GET /api/category\\\"\",\n  \"status\": 404\n}\n```\n\n**How to fix:**\n1. Verify the exact URL: `http://127.0.0.1:8000/api/categories`\n2. Run this command to list all registered routes and confirm the path:\n   ```bash\n   php bin/console debug:router\n   ```\n3. If you recently changed route configuration, clear the cache:\n   ```bash\n   php bin/console cache:clear\n   ```\n\n---\n\n### 500 Internal Server Error\n\n| Property | Value |\n| --- | --- |\n| **Code** | `500` |\n| **Meaning** | The server encountered an unexpected error while processing the request |\n| **When you see it** | Database connection failure, PHP exception in the controller, misconfigured service |\n\n**Common causes for this endpoint:**\n- The database server (MySQL, PostgreSQL, SQLite) is not running\n- The `DATABASE_URL` in `.env` or `.env.local` is incorrect\n- The `categories` table does not exist (migrations not run)\n- A PHP exception is thrown inside the `CategoryController`\n- Symfony's service container is misconfigured\n\n**Example response body (when `Accept: application/json` is set):**\n```json\n{\n  \"type\": \"https://tools.ietf.org/html/rfc2616#section-10\",\n  \"title\": \"An error occurred\",\n  \"detail\": \"An exception occurred in the driver: SQLSTATE[HY000] [2002] Connection refused\",\n  \"status\": 500\n}\n```\n\n**How to fix:**\n1. Confirm your database server is running.\n2. Check `DATABASE_URL` in `.env`:\n   ```\n   DATABASE_URL=\"mysql://root:password@127.0.0.1:3306/my_database\"\n   ```\n3. Run pending migrations:\n   ```bash\n   php bin/console doctrine:migrations:migrate\n   ```\n4. Open the Symfony profiler for a full stack trace:\n   ```\n   http://127.0.0.1:8000/_profiler\n   ```\n5. Tail the Symfony log file in real time:\n   ```bash\n   tail -f var/log/dev.log\n   ```\n\n---\n\n## Usage Guidelines\n\n### Sending the Request from JavaScript (fetch)\n\n```javascript\nconst response = await fetch('http://127.0.0.1:8000/api/categories', {\n  method: 'GET',\n  headers: {\n    'Accept': 'application/json'\n  }\n});\n\nif (!response.ok) {\n  throw new Error(`HTTP error: ${response.status}`);\n}\n\nconst categories = await response.json();\nconsole.log(categories);\n// Output: [{ id: 1, name: 'Electronics' }, { id: 2, name: 'Books' }, ...]\n```\n\n### Using the `id` Field in Subsequent Requests\n\nThe `id` returned by this endpoint is the key you use to interact with individual categories in other endpoints:\n\n```\nGET    /api/categories/1      → fetch a single category\nPUT    /api/categories/1      → update a category's name\nDELETE /api/categories/1      → delete a category\n```\n\nAlways use the `id` from the API response — never hardcode IDs in your application, as they may differ between development, staging, and production databases.\n\n### Handling an Empty Array\n\nIf the response is `[]`, do not show an error to the user. Instead, show an empty state message:\n\n```javascript\nif (categories.length === 0) {\n  console.log('No categories found. Create one to get started.');\n} else {\n  // render the list\n}\n```\n\n### Postman Test Scripts\n\nAdd these to the **Scripts → Post-response** tab of this request to automatically validate the response every time you send it:\n\n```javascript\npm.test('Status code is 200', function () {\n  pm.response.to.have.status(200);\n});\n\npm.test('Response is a JSON array', function () {\n  const body = pm.response.json();\n  pm.expect(body).to.be.an('array');\n});\n\npm.test('Each category has id (number) and name (string)', function () {\n  const body = pm.response.json();\n  body.forEach(function (category) {\n    pm.expect(category).to.have.property('id').that.is.a('number');\n    pm.expect(category).to.have.property('name').that.is.a('string');\n  });\n});\n```\n\n---\n\n## Prerequisites Checklist\n\nBefore sending this request, confirm:\n\n- [ ] Symfony server is running: `symfony server:start` or `php -S 127.0.0.1:8000 -t public/`\n- [ ] Database server is running and accessible\n- [ ] `DATABASE_URL` is correctly set in `.env` or `.env.local`\n- [ ] Migrations have been applied: `php bin/console doctrine:migrations:migrate`\n- [ ] The `Accept: application/json` header is present and enabled in the Headers tab\n- [ ] The correct Postman environment is selected (if using `{{base_url}}`)"
       },
       "response": []
+    },
+    {
+      "name": "Post Category",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/categories",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "categories"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Single Category",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/categories/1",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "categories",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Category",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/categories/1",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "categories",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Category",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/categories/1",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "categories",
+            "1"
+          ]
+        }
+      },
+      "response": []
     }
   ]
 }
