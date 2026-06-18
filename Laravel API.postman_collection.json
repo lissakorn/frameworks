@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "482261b0-f305-4f17-94b5-6e1b262313fd",
     "name": "Laravel API",
-    "description": "# Laravel API — Complete Reference\n\n## Overview\n\nThe **Laravel API** is a RESTful web service built on the [Laravel PHP framework](https://laravel.com/), one of the most popular and expressive PHP frameworks in the world. Laravel provides an elegant syntax, a powerful ORM (Eloquent), built-in validation, routing, and a rich ecosystem of tools that make building APIs fast, reliable, and maintainable.\n\nThis API exposes structured application data over HTTP in JSON format. It follows REST (Representational State Transfer) architectural principles:\n\n- Each **URL** identifies a unique resource or collection of resources (e.g., `/api/categories` represents all categories).\n- **HTTP methods** define the action: `GET` retrieves data, `POST` creates a new resource, `PATCH` updates an existing resource, `DELETE` removes a resource.\n- **Responses are stateless**: every request is self-contained and includes all the information the server needs to process it. No session state is maintained between requests.\n- **Responses are self-describing**: the HTTP status code, response headers, and JSON body together fully communicate the outcome of every request.\n\nThis collection documents every available endpoint in the Laravel API, including required headers, full request body schemas, complete response structures with field-by-field explanations, HTTP status code semantics, and practical usage guidelines.\n\nThe API is currently configured for **local development** and runs on your machine at `http://127.0.0.1:8000`. All API endpoints are prefixed with `/api/`.\n\n---\n\n## Base URL\n\n```\nhttp://127.0.0.1:8000\n```\n\nAll endpoint paths in this collection are relative to this base URL. To avoid hardcoding this value, create a Postman environment variable named `base_url` with the value `http://127.0.0.1:8000` and reference it as `{{base_url}}/api/...` in all requests.\n\n---\n\n## Endpoints Summary\n\n| # | Name | Method | Path | Description |\n|---|------|--------|------|-------------|\n| 1 | Get Categories | `GET` | `/api/categories` | Retrieve all categories |\n| 2 | Post Categories | `POST` | `/api/categories` | Create a new category |\n| 3 | Single Category | `GET` | `/api/categories/{id}` | Retrieve one category by ID |\n| 4 | Update Category | `PATCH` | `/api/categories/{id}` | Partially update a category by ID |\n| 5 | Delete Category | `DELETE` | `/api/categories/{id}` | Delete a category by ID |\n\n---\n\n## Required Request Headers\n\nEvery request to this API must include the correct HTTP headers.\n\n### `Accept: application/json`\n\n| Property | Value |\n|----------|-------|\n| **Header name** | `Accept` |\n| **Header value** | `application/json` |\n| **Required for** | All requests (GET, POST, PATCH, DELETE) |\n\nThe `Accept` header tells the server what media type the client can understand. When set to `application/json`, Laravel's exception handler returns all responses — including validation errors and server errors — as JSON objects rather than HTML pages.\n\nWithout this header:\n- A `404 Not Found` returns a full Laravel HTML error page.\n- A `422 Unprocessable Entity` returns an HTML page instead of a structured JSON error.\n- A `500 Internal Server Error` returns an HTML debug page.\n\n### `Content-Type: application/json`\n\n| Property | Value |\n|----------|-------|\n| **Header name** | `Content-Type` |\n| **Header value** | `application/json` |\n| **Required for** | `POST` and `PATCH` requests that send a JSON body |\n\nTells the server the format of the data in the request body. Without this header on a POST or PATCH request, Laravel will not parse the JSON body and `$request->input('name')` will return `null`, causing a `422` validation error.\n\n> **Postman tip:** When you select **Body → raw → JSON**, Postman adds `Content-Type: application/json` automatically.\n\n---\n\n## Category Resource Schema\n\nA **category** is the primary resource exposed by this API. Every endpoint that returns category data uses this schema.\n\n| Field | Type | Nullable | Description |\n|-------|------|----------|-------------|\n| `id` | `integer` | No | Auto-incremented primary key. Assigned by the database. Immutable after creation. |\n| `name` | `string` | No | Human-readable display name. UTF-8 encoded. Required at creation. |\n| `description` | `string` | Yes | Optional longer description. `null` if not provided. |\n| `created_at` | `string` (ISO 8601) | No | UTC timestamp of creation. Format: `YYYY-MM-DDTHH:MM:SS.000000Z`. Set by Laravel automatically. |\n| `updated_at` | `string` (ISO 8601) | No | UTC timestamp of last update. Equals `created_at` if never updated. Set by Laravel automatically. |\n\n**Example category object:**\n```json\n{\n  \"id\": 1,\n  \"name\": \"Electronics\",\n  \"description\": \"Gadgets, devices, and accessories\",\n  \"created_at\": \"2024-01-15T09:30:00.000000Z\",\n  \"updated_at\": \"2024-03-22T14:45:00.000000Z\"\n}\n```\n\n---\n\n## Endpoint Reference\n\n---\n\n### 1. Get Categories\n\n**Retrieve a list of all categories stored in the database.**\n\n| Property | Value |\n|----------|-------|\n| **Method** | `GET` |\n| **Path** | `/api/categories` |\n| **Full URL** | `http://127.0.0.1:8000/api/categories` |\n| **Auth required** | No |\n| **Request body** | None |\n\n#### Purpose\n\nThis endpoint queries the `categories` database table and returns every record as a JSON array. It is the primary read endpoint for listing all available categories. Use it to populate dropdowns, navigation menus, filter panels, or any UI component that needs the full list of categories.\n\nThe response is always an array — even if there are zero records, the server returns an empty array `[]` with a `200 OK` status. This is intentional: an empty collection is not an error.\n\n#### Required Headers\n\n| Header | Value | Required |\n|--------|-------|----------|\n| `Accept` | `application/json` | Yes |\n\n#### URL Parameters\n\nNone. This endpoint does not accept any URL path parameters.\n\n#### Query Parameters\n\nNone defined by default. The base Laravel implementation does not include pagination, filtering, or sorting parameters unless explicitly added to the controller.\n\n#### Request Body\n\nNone. `GET` requests do not have a request body.\n\n#### Success Response — `200 OK`\n\nReturned when the server successfully queries the database, regardless of how many records exist.\n\n**Response body:** A JSON array of category objects. Returns `[]` if no categories exist.\n\n```json\n[\n  {\n    \"id\": 1,\n    \"name\": \"Electronics\",\n    \"description\": \"Gadgets, devices, and accessories\",\n    \"created_at\": \"2024-01-15T09:30:00.000000Z\",\n    \"updated_at\": \"2024-01-15T09:30:00.000000Z\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Books\",\n    \"description\": null,\n    \"created_at\": \"2024-01-16T11:00:00.000000Z\",\n    \"updated_at\": \"2024-01-16T11:00:00.000000Z\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Clothing\",\n    \"description\": \"Apparel and fashion items\",\n    \"created_at\": \"2024-02-01T08:00:00.000000Z\",\n    \"updated_at\": \"2024-02-01T08:00:00.000000Z\"\n  }\n]\n```\n\n**Empty database response (still `200 OK`):**\n```json\n[]\n```\n\n#### Error Responses\n\n| Code | Condition | Response Body |\n|------|-----------|---------------|\n| `500 Internal Server Error` | Database is unreachable, migration not run, or unhandled PHP exception | `{\"message\": \"Server Error\"}` |\n\n#### Notes\n\n- The order of records in the array is determined by the database's default ordering (typically insertion order / ascending `id`).\n- There is no pagination by default. If the database grows large, consider adding `paginate()` in the controller.\n- The `description` field may be `null` for any record — always handle this in your client code.\n\n---\n\n### 2. Post Categories\n\n**Create a new category resource in the database.**\n\n| Property | Value |\n|----------|-------|\n| **Method** | `POST` |\n| **Path** | `/api/categories` |\n| **Full URL** | `http://127.0.0.1:8000/api/categories` |\n| **Auth required** | No |\n| **Request body** | JSON object |\n\n#### Purpose\n\nThis endpoint accepts a JSON body containing the data for a new category, validates it against Laravel's validation rules, inserts a new record into the `categories` table, and returns the newly created category object — including the auto-assigned `id` and timestamps generated by the database.\n\nUse this endpoint whenever a user creates a new category through your application's UI (e.g., an admin panel form, a category creation modal, or a CLI tool).\n\n#### Required Headers\n\n| Header | Value | Required |\n|--------|-------|----------|\n| `Accept` | `application/json` | Yes |\n| `Content-Type` | `application/json` | Yes |\n\n#### URL Parameters\n\nNone.\n\n#### Request Body Fields\n\nThe request body must be a valid JSON object. The following fields are accepted:\n\n| Field | Type | Required | Validation Rules | Description |\n|-------|------|----------|-----------------|-------------|\n| `name` | `string` | **Yes** | Required, must be a non-empty string | The display name of the new category. |\n| `description` | `string` | No | Optional, must be a string if provided | A longer description of the category. Omit or set to `null` to leave blank. |\n\n**Minimal valid request body (name only):**\n```json\n{\n  \"name\": \"Sports\"\n}\n```\n\n**Full request body (name and description):**\n```json\n{\n  \"name\": \"Sports\",\n  \"description\": \"Outdoor and fitness equipment\"\n}\n```\n\n#### Success Response — `201 Created`\n\nReturned when the category is successfully validated and inserted into the database.\n\n**Response body:** The complete newly created category object, including the auto-assigned `id`, `created_at`, and `updated_at` timestamps.\n\n```json\n{\n  \"id\": 5,\n  \"name\": \"Sports\",\n  \"description\": \"Outdoor and fitness equipment\",\n  \"created_at\": \"2024-06-01T12:00:00.000000Z\",\n  \"updated_at\": \"2024-06-01T12:00:00.000000Z\"\n}\n```\n\n> **Important:** Save the returned `id` value. You will need it to reference this category in future `GET /api/categories/{id}`, `PATCH /api/categories/{id}`, and `DELETE /api/categories/{id}` requests.\n\n#### Error Responses\n\n| Code | Condition | Response Body |\n|------|-----------|---------------|\n| `422 Unprocessable Entity` | `name` field is missing, empty, or fails validation | See below |\n| `500 Internal Server Error` | Database unreachable or unhandled exception | `{\"message\": \"Server Error\"}` |\n\n**`422` response body — missing `name`:**\n```json\n{\n  \"message\": \"The name field is required.\",\n  \"errors\": {\n    \"name\": [\n      \"The name field is required.\"\n    ]\n  }\n}\n```\n\n**`422` response body — `name` is not a string:**\n```json\n{\n  \"message\": \"The name field must be a string.\",\n  \"errors\": {\n    \"name\": [\n      \"The name field must be a string.\"\n    ]\n  }\n}\n```\n\nThe `errors` object maps each failing field name to an array of human-readable error messages. Iterate over this object in your client to display inline validation feedback.\n\n#### Notes\n\n- `created_at` and `updated_at` are set automatically by Laravel's Eloquent ORM. Do not include them in the request body.\n- `id` is assigned by the database auto-increment. Do not include it in the request body.\n- If you omit `description`, the field will be stored as `null` and returned as `null` in all future responses.\n\n---\n\n### 3. Single Category\n\n**Retrieve a single category by its unique numeric ID.**\n\n| Property | Value |\n|----------|-------|\n| **Method** | `GET` |\n| **Path** | `/api/categories/{id}` |\n| **Full URL** | `http://127.0.0.1:8000/api/categories/1` |\n| **Auth required** | No |\n| **Request body** | None |\n\n#### Purpose\n\nThis endpoint looks up a single category record in the database by its primary key (`id`) and returns it as a JSON object. Use it when you need the full details of one specific category — for example, to populate a category detail page, pre-fill an edit form, or verify that a category was created correctly after a `POST` request.\n\nThe `{id}` in the URL path is a **route parameter** — replace it with the actual integer ID of the category you want to retrieve (e.g., `/api/categories/3` to fetch the category with `id = 3`).\n\n#### Required Headers\n\n| Header | Value | Required |\n|--------|-------|----------|\n| `Accept` | `application/json` | Yes |\n\n#### URL Path Parameters\n\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `id` | `integer` | **Yes** | The unique numeric ID of the category to retrieve. Must be a positive integer that exists in the database. |\n\n**Example:** To retrieve the category with ID 7:\n```\nGET http://127.0.0.1:8000/api/categories/7\n```\n\n#### Query Parameters\n\nNone.\n\n#### Request Body\n\nNone. `GET` requests do not have a request body.\n\n#### Success Response — `200 OK`\n\nReturned when a category with the given `id` exists in the database.\n\n**Response body:** A single category JSON object.\n\n```json\n{\n  \"id\": 1,\n  \"name\": \"Electronics\",\n  \"description\": \"Gadgets, devices, and accessories\",\n  \"created_at\": \"2024-01-15T09:30:00.000000Z\",\n  \"updated_at\": \"2024-01-15T09:30:00.000000Z\"\n}\n```\n\n#### Error Responses\n\n| Code | Condition | Response Body |\n|------|-----------|---------------|\n| `404 Not Found` | No category with the given `id` exists in the database | `{\"message\": \"Not Found\"}` |\n| `500 Internal Server Error` | Database unreachable or unhandled exception | `{\"message\": \"Server Error\"}` |\n\n**`404` response body:**\n```json\n{\n  \"message\": \"Not Found\"\n}\n```\n\nThis response is returned when Laravel's `findOrFail()` (or `Route Model Binding`) cannot locate a record with the specified ID. It does **not** mean the URL is wrong — it means the record does not exist.\n\n#### Notes\n\n- The `{id}` must be a positive integer. Passing a non-integer (e.g., `/api/categories/abc`) will result in a `404` because Laravel's router will not match the route.\n- Use the `id` values returned by `GET /api/categories` or `POST /api/categories` to build valid URLs for this endpoint.\n- This endpoint is idempotent: calling it multiple times with the same ID always returns the same result (assuming the record has not been modified).\n\n---\n\n### 4. Update Category\n\n**Partially update an existing category by its unique numeric ID.**\n\n| Property | Value |\n|----------|-------|\n| **Method** | `PATCH` |\n| **Path** | `/api/categories/{id}` |\n| **Full URL** | `http://127.0.0.1:8000/api/categories/1` |\n| **Auth required** | No |\n| **Request body** | JSON object (partial update) |\n\n#### Purpose\n\nThis endpoint updates one or more fields of an existing category record. `PATCH` is a **partial update** method — you only need to include the fields you want to change. Fields you omit are left unchanged in the database.\n\nUse this endpoint when a user edits a category in your application's admin panel, renames a category, or updates its description without changing its name.\n\n**`PATCH` vs `PUT`:** `PUT` requires you to send the complete resource representation (all fields), replacing the entire record. `PATCH` only requires the fields you want to modify. This API uses `PATCH` for partial updates, which is the recommended approach for most real-world update operations.\n\n#### Required Headers\n\n| Header | Value | Required |\n|--------|-------|----------|\n| `Accept` | `application/json` | Yes |\n| `Content-Type` | `application/json` | Yes |\n\n#### URL Path Parameters\n\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `id` | `integer` | **Yes** | The unique numeric ID of the category to update. Must exist in the database. |\n\n**Example:** To update the category with ID 3:\n```\nPATCH http://127.0.0.1:8000/api/categories/3\n```\n\n#### Request Body Fields\n\nSend only the fields you want to update. All fields are optional for `PATCH`.\n\n| Field | Type | Required | Validation Rules | Description |\n|-------|------|----------|-----------------|-------------|\n| `name` | `string` | No | Must be a non-empty string if provided | The new display name for the category. |\n| `description` | `string` or `null` | No | Must be a string or null if provided | The new description. Pass `null` to clear it. |\n\n**Update only the name:**\n```json\n{\n  \"name\": \"Consumer Electronics\"\n}\n```\n\n**Update only the description:**\n```json\n{\n  \"description\": \"All electronic gadgets and devices\"\n}\n```\n\n**Update both fields:**\n```json\n{\n  \"name\": \"Consumer Electronics\",\n  \"description\": \"All electronic gadgets and devices\"\n}\n```\n\n**Clear the description (set to null):**\n```json\n{\n  \"description\": null\n}\n```\n\n#### Success Response — `200 OK`\n\nReturned when the category is found, the request body passes validation, and the record is successfully updated.\n\n**Response body:** The complete updated category object, reflecting all changes.\n\n```json\n{\n  \"id\": 1,\n  \"name\": \"Consumer Electronics\",\n  \"description\": \"All electronic gadgets and devices\",\n  \"created_at\": \"2024-01-15T09:30:00.000000Z\",\n  \"updated_at\": \"2024-06-18T10:00:00.000000Z\"\n}\n```\n\nNote that `updated_at` is automatically set to the current UTC timestamp by Laravel's Eloquent ORM when the record is saved. `created_at` remains unchanged.\n\n#### Error Responses\n\n| Code | Condition | Response Body |\n|------|-----------|---------------|\n| `404 Not Found` | No category with the given `id` exists | `{\"message\": \"Not Found\"}` |\n| `422 Unprocessable Entity` | A provided field fails validation (e.g., `name` is an empty string) | See below |\n| `500 Internal Server Error` | Database unreachable or unhandled exception | `{\"message\": \"Server Error\"}` |\n\n**`404` response body:**\n```json\n{\n  \"message\": \"Not Found\"\n}\n```\n\n**`422` response body — `name` sent as empty string:**\n```json\n{\n  \"message\": \"The name field must be a string.\",\n  \"errors\": {\n    \"name\": [\n      \"The name field must be a string.\"\n    ]\n  }\n}\n```\n\n#### Notes\n\n- Sending an empty JSON body `{}` is valid for `PATCH` — it results in no changes and returns the current state of the category with `200 OK`.\n- `id`, `created_at`, and `updated_at` cannot be changed via this endpoint. Even if you include them in the request body, they will be ignored.\n- Always retrieve the current state of the category first (`GET /api/categories/{id}`) before updating, to avoid overwriting data unintentionally.\n\n---\n\n### 5. Delete Category\n\n**Permanently delete a category by its unique numeric ID.**\n\n| Property | Value |\n|----------|-------|\n| **Method** | `DELETE` |\n| **Path** | `/api/categories/{id}` |\n| **Full URL** | `http://127.0.0.1:8000/api/categories/1` |\n| **Auth required** | No |\n| **Request body** | None |\n\n#### Purpose\n\nThis endpoint permanently removes a category record from the `categories` database table. The deletion is **irreversible** — once a category is deleted, it cannot be recovered unless you have a database backup or implement soft deletes in Laravel.\n\nUse this endpoint when a user removes a category from your application's admin panel, or when you need to clean up test data during development.\n\n**Warning:** If other database tables reference the deleted category's `id` as a foreign key (e.g., a `products` table with a `category_id` column), deleting the category may cause a database constraint violation (`500` error) or leave orphaned records, depending on your foreign key configuration. Always verify referential integrity before deleting.\n\n#### Required Headers\n\n| Header | Value | Required |\n|--------|-------|----------|\n| `Accept` | `application/json` | Yes |\n\n#### URL Path Parameters\n\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `id` | `integer` | **Yes** | The unique numeric ID of the category to delete. Must exist in the database. |\n\n**Example:** To delete the category with ID 5:\n```\nDELETE http://127.0.0.1:8000/api/categories/5\n```\n\n#### Query Parameters\n\nNone.\n\n#### Request Body\n\nNone. `DELETE` requests do not require a request body.\n\n#### Success Response — `200 OK` or `204 No Content`\n\nThe response code depends on the controller implementation:\n\n**Option A — `200 OK` with a confirmation message (common Laravel pattern):**\n\n```json\n{\n  \"message\": \"Category deleted successfully.\"\n}\n```\n\n**Option B — `204 No Content` (no response body):**\n\nThe server returns HTTP `204` with an empty body. This is the REST-standard response for a successful deletion. In Postman, the response body panel will be empty.\n\n> Check your controller's `destroy` method to confirm which response your implementation returns.\n\n#### Error Responses\n\n| Code | Condition | Response Body |\n|------|-----------|---------------|\n| `404 Not Found` | No category with the given `id` exists in the database | `{\"message\": \"Not Found\"}` |\n| `500 Internal Server Error` | Database constraint violation, unreachable database, or unhandled exception | `{\"message\": \"Server Error\"}` |\n\n**`404` response body:**\n```json\n{\n  \"message\": \"Not Found\"\n}\n```\n\nThis is returned when you attempt to delete a category that does not exist — for example, if it was already deleted, or if you used the wrong ID.\n\n**`500` response body (foreign key constraint violation):**\n```json\n{\n  \"message\": \"Server Error\"\n}\n```\n\nIn `APP_DEBUG=true` mode, the response will include the full SQL error:\n```json\n{\n  \"message\": \"SQLSTATE[23000]: Integrity constraint violation: 1451 Cannot delete or update a parent row: a foreign key constraint fails\",\n  \"exception\": \"Illuminate\\\\Database\\\\QueryException\"\n}\n```\n\n#### Notes\n\n- Deletion is **permanent and irreversible** by default. To implement recoverable deletion, add Laravel's `SoftDeletes` trait to the `Category` model.\n- After a successful deletion, any subsequent `GET /api/categories/{id}` request for the same ID will return `404 Not Found`.\n- The deleted category's `id` will **not** be reused by the database auto-increment — the next created category will receive a higher ID.\n- To implement soft deletes (mark as deleted without removing from the database), add `use SoftDeletes;` to your `Category` model and run a migration to add a `deleted_at` column.\n\n---\n\n## HTTP Status Code Reference\n\n| Code | Name | Used By | Meaning |\n|------|------|---------|---------|\n| `200` | OK | GET, PATCH, DELETE | Request succeeded. Response body contains the requested data or confirmation. |\n| `201` | Created | POST | New resource created successfully. Response body contains the new object with its assigned `id`. |\n| `204` | No Content | DELETE | Resource deleted successfully. No response body. |\n| `400` | Bad Request | Any | Malformed request syntax. Rarely returned by Laravel directly — usually `422` is used instead. |\n| `401` | Unauthorized | Any (if auth added) | Authentication credentials are missing or invalid. Returned when Laravel Sanctum/Passport middleware rejects the request. |\n| `403` | Forbidden | Any (if auth added) | Authenticated but not authorized to perform this action. |\n| `404` | Not Found | Any | The URL does not match any route, or the requested resource ID does not exist. |\n| `422` | Unprocessable Entity | POST, PATCH | Request body is syntactically valid JSON but fails Laravel's validation rules. The `errors` object contains field-level messages. |\n| `500` | Internal Server Error | Any | Unhandled server-side exception. Check `storage/logs/laravel.log` for details. |\n\n---\n\n## Error Response Structure\n\nAll error responses from this API follow a consistent JSON structure when the `Accept: application/json` header is present.\n\n### Validation Error (`422`)\n\n```json\n{\n  \"message\": \"The name field is required.\",\n  \"errors\": {\n    \"name\": [\n      \"The name field is required.\"\n    ],\n    \"description\": [\n      \"The description field must be a string.\"\n    ]\n  }\n}\n```\n\n| Field | Type | Description |\n|-------|------|-------------|\n| `message` | `string` | A human-readable summary of the first validation error. |\n| `errors` | `object` | A map of field names to arrays of error messages. Each key is a request field that failed validation. |\n\n### General Error (`404`, `500`)\n\n```json\n{\n  \"message\": \"Not Found\"\n}\n```\n\n| Field | Type | Description |\n|-------|------|-------------|\n| `message` | `string` | A brief description of the error. |\n\nIn `APP_DEBUG=true` mode, `500` errors also include `exception`, `file`, `line`, and `trace` fields for debugging.\n\n---\n\n## Usage Guidelines\n\n### 1. Start the Laravel Development Server\n\n```bash\nphp artisan serve\n# Starts at http://127.0.0.1:8000 by default\n```\n\n### 2. Always Include the Accept Header\n\nEvery request must include `Accept: application/json` to ensure all responses — including errors — are returned as JSON.\n\n### 3. Use a Postman Environment for the Base URL\n\n1. Create a Postman environment called `Laravel Local`.\n2. Add variable: `base_url` = `http://127.0.0.1:8000`.\n3. Select the environment from the top-right dropdown.\n4. Use `{{base_url}}/api/categories` in all request URLs.\n\n### 4. Understand the Status Code Before Reading the Body\n\n| Code | Action |\n|------|--------|\n| `200` | Read the array (GET) or updated object (PATCH) |\n| `201` | Read the created object and save the `id` |\n| `204` | No body — deletion was successful |\n| `404` | Fix the URL or verify the resource ID exists |\n| `422` | Read `errors` object and fix the request body |\n| `500` | Check `storage/logs/laravel.log` |\n\n### 5. Database Setup\n\n```bash\nphp artisan migrate        # Create tables\nphp artisan db:seed        # Optional: seed with sample data\n```\n\n### 6. Environment Configuration (`.env`)\n\n```env\nAPP_ENV=local\nAPP_DEBUG=true\nAPP_URL=http://127.0.0.1:8000\nDB_CONNECTION=mysql\nDB_HOST=127.0.0.1\nDB_PORT=3306\nDB_DATABASE=laravel\nDB_USERNAME=root\nDB_PASSWORD=\n```\n\nAfter changing `.env`:\n```bash\nphp artisan config:clear\nphp artisan cache:clear\n```\n\n### 7. Debugging Tips\n\n- **`500` errors:** Run `tail -f storage/logs/laravel.log` to stream live log output.\n- **Route not found:** Run `php artisan route:list` to see all registered routes.\n- **Stale routes:** Run `php artisan route:clear` after adding new routes.\n- **Validation not triggering:** Ensure `Content-Type: application/json` is set on POST/PATCH requests.\n- **Empty response body on DELETE:** Your controller may return `204 No Content` — this is correct behaviour.\n\n---\n\n## Getting Started Checklist\n\n- [ ] Laravel development server is running: `php artisan serve`\n- [ ] Database is running and `.env` credentials are correct\n- [ ] Migrations have been applied: `php artisan migrate`\n- [ ] Postman environment `Laravel Local` is created with `base_url = http://127.0.0.1:8000`\n- [ ] All requests include the `Accept: application/json` header\n- [ ] POST and PATCH requests include `Content-Type: application/json` and a valid JSON body\n- [ ] You have sent `GET /api/categories` and received a `200 OK` response",
+    "description": "# Laravel API — Категорії товарів (Categories)\n\nЦя колекція містить повний REST API для управління категоріями товарів, реалізований на фреймворку **Laravel** (версія 10+). Колекція призначена для демонстрації базових CRUD-операцій над ресурсом `Category` в навчальному проєкті.\n\n> **Важлива архітектурна примітка:** У цьому проєкті реальна база даних не використовується. Замість неї всі категорії зберігаються у PHP-константі `CATEGORIES`, оголошеній безпосередньо всередині контролера `CategoryController`. Це свідома архітектурна рішення для навчальних цілей — імітація сховища даних без підключення до СУБД. При виконанні мутаційних операцій (POST, PATCH, DELETE) відповідь сервера містить поле `all_categories_snapshot` — повний локальний знімок масиву категорій після виконання операції. \n  \n\n---\n\n## Загальна технічна інформація\n\n| Параметр | Значення |\n| --- | --- |\n| **Фреймворк** | Laravel 10+ |\n| **Мова** | PHP 8.1+ |\n| **Базовий URL** | `http://127.0.0.1:8000` |\n| **Префікс маршрутів** | `/api/categories` |\n| **Формат запитів** | JSON (`application/json`) |\n| **Формат відповідей** | JSON (`application/json`) |\n| **Файл маршрутів** | `routes/api.php` |\n| **Контролер** | `App\\Http\\Controllers\\CategoryController` |\n| **Сховище даних** | Константний масив `CATEGORIES` у контролері |\n\n---\n\n## Архітектура проєкту\n\nПроєкт побудований за класичною MVC-архітектурою Laravel. Маршрути оголошені у файлі `routes/api.php` і автоматично отримують префікс `/api` завдяки налаштуванням у `app/Http/Kernel.php`. Контролер `CategoryController` обробляє всі вхідні HTTP-запити, виконує валідацію вхідних даних за допомогою методу `$request->validate()` або `Validator::make()`, та формує JSON-відповіді через `response()->json()`.\n\nОскільки реальна база даних відсутня, контролер оголошує константу:\n\n``` php\nconst CATEGORIES = [\n    ['id' => 1, 'name' => 'Електроніка', 'description' => 'Телефони, ноутбуки, планшети та інша електроніка'],\n    ['id' => 2, 'name' => 'Одяг', 'description' => 'Чоловічий, жіночий та дитячий одяг'],\n    ['id' => 3, 'name' => 'Книги', 'description' => 'Художня та навчальна література'],\n    ['id' => 4, 'name' => 'Спорт', 'description' => 'Спортивний інвентар та одяг для активного відпочинку'],\n    ['id' => 5, 'name' => 'Дім та сад', 'description' => 'Товари для дому, саду та ремонту'],\n];\n\n ```\n\nПри мутаціях контролер копіює константу у локальну змінну, виконує зміни над копією, і повертає у відповіді поле `all_categories_snapshot` — повний знімок масиву після операції.\n\n---\n\n## Структура об'єкта `Category`\n\nКожна категорія товарів представлена об'єктом з такими полями:\n\n| Поле | Тип даних | Обов'язкове | Макс. довжина | Опис |\n| --- | --- | --- | --- | --- |\n| `id` | `integer` | Генерується автоматично | — | Унікальний числовий ідентифікатор категорії. При створенні обчислюється як `max(id) + 1` по масиву `CATEGORIES`. |\n| `name` | `string` | Так | 255 символів | Назва категорії товарів. Обов'язкове поле. Не може бути порожнім рядком. |\n| `description` | `string` | Ні | 1000 символів | Текстовий опис категорії. Необов'язкове поле. Може бути `null`. |\n\n**Приклад повного об'єкта** **`Category`****:**\n\n``` json\n{\n  \"id\": 1,\n  \"name\": \"Електроніка\",\n  \"description\": \"Телефони, ноутбуки, планшети та інша електроніка\"\n}\n\n ```\n\n---\n\n## Таблиця всіх маршрутів\n\n| # | HTTP-метод | URL | Метод контролера | Опис операції |\n| --- | --- | --- | --- | --- |\n| 1 | `GET` | `/api/categories` | `index()` | Отримати список усіх категорій |\n| 2 | `GET` | `/api/categories/{id}` | `show($id)` | Отримати одну категорію за ID |\n| 3 | `POST` | `/api/categories` | `store(Request $request)` | Створити нову категорію |\n| 4 | `PATCH` | `/api/categories/{id}` | `update(Request $request, $id)` | Частково оновити категорію |\n| 5 | `DELETE` | `/api/categories/{id}` | `destroy($id)` | Видалити категорію |\n\n---\n\n## Загальні заголовки\n\n### Заголовки запиту (Request Headers)\n\n| Заголовок | Значення | Обов'язковий | Призначення |\n| --- | --- | --- | --- |\n| `Accept` | `application/json` | Завжди | Повідомляє серверу, що клієнт очікує відповідь у форматі JSON. Laravel використовує цей заголовок для визначення формату відповіді при помилках валідації. |\n| `Content-Type` | `application/json` | Для POST та PATCH | Повідомляє серверу, що тіло запиту передається у форматі JSON. Без цього заголовка Laravel не зможе правильно розпарсити тіло запиту. |\n\n### Заголовки відповіді (Response Headers)\n\n| Заголовок | Значення | Призначення |\n| --- | --- | --- |\n| `Content-Type` | `application/json` | Вказує, що тіло відповіді є JSON-рядком. |\n| `X-RateLimit-Limit` | `60` | Максимальна кількість запитів за хвилину (стандартний throttle Laravel). |\n| `X-RateLimit-Remaining` | `59` | Кількість запитів, що залишилась у поточному вікні. |\n\n---\n\n## Коди HTTP-відповідей\n\n| Код | Статус | Коли повертається |\n| --- | --- | --- |\n| `200` | OK | Успішне отримання даних або успішне оновлення/видалення |\n| `201` | Created | Успішне створення нового ресурсу (POST) |\n| `400` | Bad Request | Помилка валідації вхідних даних |\n| `404` | Not Found | Категорія з вказаним ID не знайдена в масиві `CATEGORIES` |\n| `405` | Method Not Allowed | Використано HTTP-метод, який не підтримується для цього маршруту |\n| `422` | Unprocessable Entity | Альтернативний код Laravel при помилках валідації через `$request->validate()` |\n| `500` | Internal Server Error | Непередбачена внутрішня помилка сервера |",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "55943009",
     "_collection_link": "https://go.postman.co/collection/55943009-482261b0-f305-4f17-94b5-6e1b262313fd?source=collection_link"
@@ -28,7 +28,7 @@
             "categories"
           ]
         },
-        "description": "# Get Categories\n\nRetrieves a complete list of all category resources stored in the database. This is a **read-only** endpoint — it does not create, modify, or delete any data. The response is a JSON array where each element represents one category object.\n\n---\n\n## Endpoint\n\n| Property | Value |\n| --- | --- |\n| **Method** | `GET` |\n| **URL** | `http://127.0.0.1:8000/api/categories` |\n| **Authentication** | None required |\n| **Request Body** | None |\n| **Idempotent** | Yes — calling this endpoint multiple times always returns the same result without side effects |\n| **Safe** | Yes — this endpoint never modifies server state |\n\n---\n\n## Required Request Headers\n\n| Header | Value | Required | Purpose |\n| --- | --- | --- | --- |\n| `Accept` | `application/json` | **Yes** | Instructs Laravel to return all responses (including errors) as JSON rather than HTML pages |\n\n**How to add this header in Postman:**\n1. Open this request.\n2. Click the **Headers** tab.\n3. Add a new row: Key = `Accept`, Value = `application/json`.\n4. Ensure the checkbox on the left is **checked** (enabled).\n5. Click **Send**.\n\n> `Content-Type` is **not** required for this request because `GET` requests do not have a request body.\n\n---\n\n## Query Parameters\n\nThis endpoint does not accept any query parameters. The full list of categories is always returned. Filtering, sorting, and pagination are not currently implemented.\n\n| Parameter | Type | Required | Description |\n| --- | --- | --- | --- |\n| *(none)* | — | — | No query parameters are supported |\n\n---\n\n## JSON Response Structure\n\nA successful `200 OK` response returns a **JSON array** at the top level. Each element of the array is a **category object**.\n\n### Category Object Fields\n\n| Field | Type | Nullable | Description |\n| --- | --- | --- | --- |\n| `id` | `integer` | No | Unique numeric identifier. Auto-assigned by the database. Immutable. |\n| `name` | `string` | No | Human-readable display name of the category. UTF-8 encoded. |\n| `description` | `string` | Yes | Optional longer description. Will be `null` if not set. |\n| `created_at` | `string` (ISO 8601) | No | UTC timestamp of when the record was created. Set automatically by Laravel. |\n| `updated_at` | `string` (ISO 8601) | No | UTC timestamp of the last update. Equals `created_at` if never updated. |\n\n### `id` — Detailed Explanation\n\n- **Type:** Positive integer (e.g., `1`, `7`, `42`)\n- **Source:** Auto-incremented primary key assigned by the database at creation time\n- **Immutable:** Yes — never changes after the record is created\n- **Unique:** Guaranteed unique across all category records\n- **Never zero or negative** in a real database\n- **Primary use:** Reference this value when building URLs for single-resource endpoints:\n  ```\n  GET    /api/categories/1\n  PUT    /api/categories/1\n  DELETE /api/categories/1\n  ```\n- **In your front-end:** Store this as the key in dropdowns, lists, and state management\n\n### `name` — Detailed Explanation\n\n- **Type:** UTF-8 string\n- **Source:** Provided by the client when the category was created\n- **Required at creation:** Yes\n- **Mutable:** Yes — can be changed via `PUT` or `PATCH`\n- **May contain:** Spaces, punctuation, accented characters, Unicode (e.g., `\"Électronique\"`, `\"Bücher\"`, `\"Категорія\"`)\n- **Primary use:** Display to end users in navigation menus, filter dropdowns, product listings\n\n### `description` — Detailed Explanation\n\n- **Type:** UTF-8 string or `null`\n- **Source:** Optionally provided by the client at creation or update time\n- **Required at creation:** No — will be `null` if omitted\n- **Mutable:** Yes\n- **May contain:** Long-form text, line breaks, Unicode\n- **Null handling:** Always check for `null` before rendering:\n  ```javascript\n  const desc = category.description ?? 'No description provided.';\n  ```\n\n### `created_at` — Detailed Explanation\n\n- **Type:** UTC timestamp string, ISO 8601 format\n- **Example:** `\"2024-01-15T09:30:00.000000Z\"`\n- **Source:** Set automatically by Laravel's Eloquent ORM at creation. Cannot be set manually.\n- **Immutable:** Yes\n- **Parsing in JavaScript:**\n  ```javascript\n  const date = new Date(category.created_at);\n  console.log(date.toLocaleDateString()); // e.g. \"1/15/2024\"\n  ```\n\n### `updated_at` — Detailed Explanation\n\n- **Type:** UTC timestamp string, ISO 8601 format\n- **Example:** `\"2024-03-22T14:45:00.000000Z\"`\n- **Source:** Updated automatically by Laravel every time the record is saved\n- **Equals `created_at`** when the record has never been modified\n\n### Full Response Example (with data)\n\n```json\n[\n  {\n    \"id\": 1,\n    \"name\": \"Electronics\",\n    \"description\": \"Gadgets, devices, and accessories\",\n    \"created_at\": \"2024-01-15T09:30:00.000000Z\",\n    \"updated_at\": \"2024-01-15T09:30:00.000000Z\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Books\",\n    \"description\": null,\n    \"created_at\": \"2024-01-16T11:00:00.000000Z\",\n    \"updated_at\": \"2024-01-16T11:00:00.000000Z\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Clothing\",\n    \"description\": \"Apparel and fashion items\",\n    \"created_at\": \"2024-01-17T08:45:00.000000Z\",\n    \"updated_at\": \"2024-02-01T10:00:00.000000Z\"\n  }\n]\n```\n\n### Empty Response Example\n\n```json\n[]\n```\n\nAn empty array is a **valid, successful response**. It means the `categories` table exists but contains no rows. The HTTP status code will still be `200 OK`. Do not treat this as an error.\n\n---\n\n## HTTP Status Codes\n\n### 200 OK\n\n| Property | Value |\n| --- | --- |\n| **Code** | `200` |\n| **Meaning** | Request succeeded. The server queried the database and returned the result. |\n| **When you see it** | The Laravel server is running, the database is reachable, and the route is registered |\n\n**Example response:**\n```json\n[\n  {\n    \"id\": 1,\n    \"name\": \"Electronics\",\n    \"description\": \"Gadgets and devices\",\n    \"created_at\": \"2024-01-15T09:30:00.000000Z\",\n    \"updated_at\": \"2024-01-15T09:30:00.000000Z\"\n  }\n]\n```\n\n**What to do:** Read the array and use the data. If the array is empty (`[]`), display an empty state in your UI — this is still a success.\n\n---\n\n### 404 Not Found\n\n| Property | Value |\n| --- | --- |\n| **Code** | `404` |\n| **Meaning** | The URL you requested does not match any route registered in Laravel |\n| **When you see it** | URL typo, wrong path, or route not registered in `routes/api.php` |\n\n**Common causes for this endpoint:**\n- Typing `/api/category` instead of `/api/categories` (missing the `s`)\n- Typing `/api/Categories` (wrong case — URLs are case-sensitive)\n- The route is missing from `routes/api.php`\n- The route cache is stale after a code change\n\n**Example response body (with `Accept: application/json`):**\n```json\n{\n  \"message\": \"Not Found\"\n}\n```\n\n**How to fix:**\n1. Verify the exact URL: `http://127.0.0.1:8000/api/categories`\n2. List all registered routes:\n   ```bash\n   php artisan route:list\n   ```\n3. Clear the route cache:\n   ```bash\n   php artisan route:clear\n   ```\n\n---\n\n### 500 Internal Server Error\n\n| Property | Value |\n| --- | --- |\n| **Code** | `500` |\n| **Meaning** | The server encountered an unexpected error while processing the request |\n| **When you see it** | Database connection failure, PHP exception in the controller, missing table |\n\n**Common causes for this endpoint:**\n- The database server is not running\n- `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, or `DB_PASSWORD` in `.env` is incorrect\n- The `categories` table does not exist (migrations not run)\n- A PHP exception is thrown inside the controller\n\n**Example response body (with `Accept: application/json`, `APP_DEBUG=true`):**\n```json\n{\n  \"message\": \"SQLSTATE[HY000] [2002] Connection refused\",\n  \"exception\": \"Illuminate\\\\Database\\\\QueryException\",\n  \"file\": \"/var/www/app/vendor/laravel/framework/src/Illuminate/Database/Connection.php\",\n  \"line\": 760,\n  \"trace\": []\n}\n```\n\n**How to fix:**\n1. Confirm your database server is running.\n2. Check your `.env` database credentials.\n3. Run pending migrations:\n   ```bash\n   php artisan migrate\n   ```\n4. Tail the Laravel log file:\n   ```bash\n   tail -f storage/logs/laravel.log\n   ```\n5. Set `APP_DEBUG=true` in `.env` to get a full stack trace in the response.\n\n---\n\n## Usage Guidelines\n\n### Sending the Request from JavaScript (fetch)\n\n```javascript\nconst response = await fetch('http://127.0.0.1:8000/api/categories', {\n  method: 'GET',\n  headers: {\n    'Accept': 'application/json'\n  }\n});\n\nif (!response.ok) {\n  throw new Error(`HTTP error: ${response.status}`);\n}\n\nconst categories = await response.json();\nconsole.log(categories);\n// Output: [{ id: 1, name: 'Electronics', description: '...', created_at: '...', updated_at: '...' }, ...]\n```\n\n### Using the `id` Field in Subsequent Requests\n\nThe `id` returned by this endpoint is the key you use to interact with individual categories:\n\n```\nGET    /api/categories/1      → fetch a single category\nPUT    /api/categories/1      → update a category\nDELETE /api/categories/1      → delete a category\n```\n\nNever hardcode IDs — always use the values returned by the API, as they differ between development, staging, and production databases.\n\n### Handling a Null `description`\n\n```javascript\ncategories.forEach(category => {\n  const desc = category.description ?? 'No description available.';\n  console.log(`${category.name}: ${desc}`);\n});\n```\n\n### Handling an Empty Array\n\n```javascript\nif (categories.length === 0) {\n  console.log('No categories yet. Use POST /api/categories to create one.');\n} else {\n  // render the list\n}\n```\n\n### Postman Test Scripts\n\nAdd these to the **Scripts → Post-response** tab to automatically validate the response:\n\n```javascript\npm.test('Status code is 200', function () {\n  pm.response.to.have.status(200);\n});\n\npm.test('Response is a JSON array', function () {\n  const body = pm.response.json();\n  pm.expect(body).to.be.an('array');\n});\n\npm.test('Each category has id, name, created_at, updated_at', function () {\n  const body = pm.response.json();\n  body.forEach(function (category) {\n    pm.expect(category).to.have.property('id').that.is.a('number');\n    pm.expect(category).to.have.property('name').that.is.a('string');\n    pm.expect(category).to.have.property('created_at').that.is.a('string');\n    pm.expect(category).to.have.property('updated_at').that.is.a('string');\n  });\n});\n\npm.test('description is string or null', function () {\n  const body = pm.response.json();\n  body.forEach(function (category) {\n    const desc = category.description;\n    pm.expect(desc === null || typeof desc === 'string').to.be.true;\n  });\n});\n```\n\n---\n\n## Prerequisites Checklist\n\n- [ ] Laravel server is running: `php artisan serve`\n- [ ] Database server is running and accessible\n- [ ] `.env` database credentials are correct\n- [ ] Migrations have been applied: `php artisan migrate`\n- [ ] `Accept: application/json` header is present and enabled in the Headers tab\n- [ ] Correct Postman environment is selected (if using `{{base_url}}`)"
+        "description": "## GET /api/categories — Отримання повного списку категорій товарів\n\n### Технічний опис маршруту\n\nЦей ендпоінт реалізує операцію **Read (читання)** у CRUD-архітектурі. Його роль — надати клієнту повний перелік усіх категорій товарів, що зберігаються у константному масиві `CATEGORIES` контролера. Ендпоінт є ідемпотентним: скільки б разів його не викликали, він завжди повертає один і той самий результат (поки масив не змінено мутаційними операціями).\n\nУ Laravel цей маршрут обробляється методом `index()` контролера `CategoryController`. Метод зчитує константу `self::CATEGORIES`, перетворює її на колекцію або масив і повертає через `response()->json()` зі статус-кодом `200 OK`.\n\n**Внутрішній PHP-код контролера (Laravel):**\n\n```php\npublic function index(): JsonResponse\n{\n    $categories = self::CATEGORIES;\n    return response()->json($categories, 200);\n}\n```\n\n---\n\n### Маршрутизація (Routing) у Laravel\n\nМаршрут оголошений у файлі `routes/api.php`:\n\n```php\nRoute::get('/categories', [CategoryController::class, 'index']);\n```\n\nЗавдяки налаштуванням у `RouteServiceProvider` (або `bootstrap/app.php` у Laravel 11), всі маршрути з файлу `routes/api.php` автоматично отримують префікс `/api`. Таким чином, повний шлях маршруту стає `/api/categories`.\n\n---\n\n### HTTP-метод та повний URL\n\n| Параметр | Значення |\n|----------|----------|\n| **HTTP-метод** | `GET` |\n| **Повний URL** | `http://127.0.0.1:8000/api/categories` |\n| **Метод контролера** | `CategoryController@index` |\n\n---\n\n### Заголовки запиту (Request Headers)\n\n| Заголовок | Значення | Обов'язковий | Детальне призначення |\n|-----------|----------|--------------|----------------------|\n| `Accept` | `application/json` | Так | Інформує Laravel, що клієнт очікує відповідь у форматі JSON. Якщо цей заголовок не передати, Laravel може повернути HTML-відповідь при виникненні помилок. |\n\n### Заголовки відповіді (Response Headers)\n\n| Заголовок | Значення | Призначення |\n|-----------|----------|-------------|\n| `Content-Type` | `application/json; charset=UTF-8` | Вказує формат тіла відповіді. |\n| `X-RateLimit-Limit` | `60` | Ліміт запитів на хвилину. |\n| `X-RateLimit-Remaining` | `59` | Залишок запитів у поточному вікні. |\n\n---\n\n### Параметри запиту\n\nЦей ендпоінт **не приймає** жодних параметрів у тілі запиту (Request Body), параметрів шляху (Path Parameters) або параметрів рядка запиту (Query String Parameters). Запит виконується без будь-яких додаткових даних.\n\n---\n\n### Приклад успішної відповіді\n\n**Статус:** `200 OK`\n\n```json\n[\n  {\n    \"id\": 1,\n    \"name\": \"Електроніка\",\n    \"description\": \"Телефони, ноутбуки, планшети та інша електроніка\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Одяг\",\n    \"description\": \"Чоловічий, жіночий та дитячий одяг\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Книги\",\n    \"description\": \"Художня та навчальна література\"\n  },\n  {\n    \"id\": 4,\n    \"name\": \"Спорт\",\n    \"description\": \"Спортивний інвентар та одяг для активного відпочинку\"\n  },\n  {\n    \"id\": 5,\n    \"name\": \"Дім та сад\",\n    \"description\": \"Товари для дому, саду та ремонту\"\n  }\n]\n```\n\n---\n\n### Відповідь при порожньому масиві\n\nЯкщо константа `CATEGORIES` не містить жодного елемента, ендпоінт повертає порожній масив зі статусом `200 OK`. Це коректна поведінка — відсутність даних не є помилкою.\n\n**Статус:** `200 OK`\n\n```json\n[]\n```\n\n---\n\n### Можливі помилки\n\n| Код | Статус | Причина виникнення | Тіло відповіді |\n|-----|--------|--------------------|----------------|\n| `405` | Method Not Allowed | Клієнт надіслав запит методом POST, PUT, PATCH або DELETE на цей маршрут | `{\"message\": \"The POST method is not supported for route api/categories. Supported methods: GET, HEAD.\"}` |\n| `500` | Internal Server Error | Непередбачена помилка на стороні сервера | `{\"message\": \"Server Error\"}` |\n\n### Приклад відповіді 405 Method Not Allowed\n\n**Статус:** `405 Method Not Allowed`\n\n```json\n{\n  \"message\": \"The POST method is not supported for route api/categories. Supported methods: GET, HEAD.\"\n}\n```"
       },
       "response": [
         {
@@ -87,6 +87,117 @@
           ],
           "cookie": [],
           "body": "[\n    {\n        \"id\": 1,\n        \"name\": \"Електроніка\",\n        \"description\": \"Смартфони, ноутбуки та інші гаджети\",\n        \"created_at\": \"2026-06-16T08:51:41.000000Z\",\n        \"updated_at\": \"2026-06-16T08:51:41.000000Z\"\n    },\n    {\n        \"id\": 2,\n        \"name\": \"Електроніка\",\n        \"description\": \"Смартфони, ноутбуки та інші гаджети\",\n        \"created_at\": \"2026-06-16T08:54:48.000000Z\",\n        \"updated_at\": \"2026-06-16T08:54:48.000000Z\"\n    }\n]"
+        },
+        {
+          "name": "200 OK — Повний список категорій",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "[\n  {\"id\": 1, \"name\": \"Електроніка\", \"description\": \"Смартфони, ноутбуки, планшети та інша електронна техніка\"},\n  {\"id\": 2, \"name\": \"Одяг\", \"description\": \"Чоловічий, жіночий та дитячий одяг усіх розмірів\"},\n  {\"id\": 3, \"name\": \"Взуття\", \"description\": \"Спортивне, повсякденне та святкове взуття для всієї родини\"},\n  {\"id\": 4, \"name\": \"Меблі\", \"description\": \"Меблі для дому, офісу та саду\"},\n  {\"id\": 5, \"name\": \"Продукти харчування\", \"description\": \"Свіжі та консервовані продукти, напої та снеки\"}\n]"
+        },
+        {
+          "name": "200 OK — Порожній список (масив порожній)",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "[]"
+        },
+        {
+          "name": "405 Method Not Allowed — Недозволений метод",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories"
+              ]
+            }
+          },
+          "status": "Method Not Allowed",
+          "code": 405,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "{\"message\": \"The POST method is not supported for route api/categories. Supported methods: GET, HEAD.\"}"
         }
       ]
     },
@@ -130,9 +241,158 @@
             "categories"
           ]
         },
-        "description": "# Post Categories\n\nCreates a new category resource in the database. This is a **write** endpoint — it inserts a new record and returns the full created object, including the auto-assigned `id` and timestamps. Sending this request multiple times with the same body will create multiple separate category records (it is **not** idempotent).\n\n---\n\n## Endpoint\n\n| Property | Value |\n| --- | --- |\n| **Method** | `POST` |\n| **URL** | `http://127.0.0.1:8000/api/categories` |\n| **Authentication** | None required |\n| **Request Body** | JSON object with category fields |\n| **Idempotent** | No — each call creates a new record |\n| **Safe** | No — this endpoint modifies server state |\n\n---\n\n## Required Request Headers\n\n| Header | Value | Required | Purpose |\n| --- | --- | --- | --- |\n| `Accept` | `application/json` | **Yes** | Instructs Laravel to return all responses (including validation errors) as JSON rather than HTML pages |\n| `Content-Type` | `application/json` | **Yes** | Tells Laravel to parse the request body as JSON. Without this, `$request->input('name')` returns `null` and validation fails. |\n\n**How to add these headers in Postman:**\n1. Open this request.\n2. Click the **Headers** tab.\n3. Add two rows:\n   - Key = `Accept`, Value = `application/json`\n   - Key = `Content-Type`, Value = `application/json`\n4. Ensure both checkboxes are **checked** (enabled).\n\n> **Shortcut:** If you select **Body → raw → JSON** in Postman, the `Content-Type: application/json` header is added automatically. You still need to add `Accept: application/json` manually.\n\n---\n\n## Request Body\n\nThe request body must be a **JSON object**. Send it in the **Body → raw → JSON** tab in Postman.\n\n### Request Body Fields\n\n| Field | Type | Required | Description |\n| --- | --- | --- | --- |\n| `name` | `string` | **Yes** | The display name of the new category. Must be a non-empty string. |\n| `description` | `string` | No | An optional longer description of the category. Omit this field or set it to `null` if not needed. |\n\n### Minimal Request Body (name only)\n\n```json\n{\n  \"name\": \"Electronics\"\n}\n```\n\n### Full Request Body (name and description)\n\n```json\n{\n  \"name\": \"Electronics\",\n  \"description\": \"Gadgets, devices, and accessories including phones, laptops, and cameras.\"\n}\n```\n\n### Field Rules\n\n#### `name`\n- **Required:** Yes. Omitting it or sending an empty string will result in a `422 Unprocessable Entity` response.\n- **Type:** String. Sending a number or boolean will fail validation.\n- **Max length:** Depends on the database column definition (typically 255 characters for a `VARCHAR(255)`).\n- **Uniqueness:** Not enforced at the API level unless the database has a unique constraint.\n- **Examples of valid values:** `\"Books\"`, `\"Home & Garden\"`, `\"Électronique\"`, `\"Bücher\"`\n- **Examples of invalid values:** `\"\"` (empty string), `null`, `123` (number), omitted entirely\n\n#### `description`\n- **Required:** No. If omitted, the field will be stored as `null` in the database and returned as `null` in the response.\n- **Type:** String or `null`.\n- **Max length:** Typically unlimited (stored as `TEXT` in the database).\n- **May contain:** Long-form text, line breaks, Unicode characters.\n\n---\n\n## JSON Response Structure\n\nA successful `201 Created` response returns a **JSON object** representing the newly created category.\n\n### Response Fields\n\n| Field | Type | Nullable | Description |\n| --- | --- | --- | --- |\n| `id` | `integer` | No | The unique numeric identifier assigned by the database. Use this in future requests. |\n| `name` | `string` | No | The name you provided in the request body. |\n| `description` | `string` | Yes | The description you provided, or `null` if not provided. |\n| `created_at` | `string` (ISO 8601) | No | UTC timestamp of when the record was created. Set automatically by Laravel. |\n| `updated_at` | `string` (ISO 8601) | No | UTC timestamp of the last update. Equals `created_at` immediately after creation. |\n\n### `id` — Detailed Explanation\n\n- **Type:** Positive integer (e.g., `1`, `7`, `42`)\n- **Source:** Auto-incremented primary key assigned by the database at the moment of insertion\n- **Immutable:** Yes — never changes after creation\n- **Unique:** Guaranteed unique across all category records\n- **Critical:** Save this value immediately after a successful `POST`. You will need it to update or delete this category:\n  ```\n  PUT    /api/categories/{id}\n  DELETE /api/categories/{id}\n  ```\n- **Do not assume sequential IDs** — if records have been deleted, there may be gaps (e.g., `1, 2, 5, 6`)\n\n### `name` — Detailed Explanation\n\n- **Type:** UTF-8 string\n- **Value:** Exactly what you sent in the request body (after Laravel trims whitespace, if configured)\n- **Mutable:** Yes — can be changed via `PUT` or `PATCH` endpoints\n- **Primary use:** Display to end users in navigation menus, filter dropdowns, product listings\n\n### `description` — Detailed Explanation\n\n- **Type:** UTF-8 string or `null`\n- **Value:** What you sent in the request body, or `null` if you omitted the field\n- **Mutable:** Yes — can be set or updated via `PUT` or `PATCH`\n- **Null handling:** Always check for `null` before rendering in your UI:\n  ```javascript\n  const desc = category.description ?? 'No description provided.';\n  ```\n\n### `created_at` — Detailed Explanation\n\n- **Type:** UTC timestamp string, ISO 8601 format\n- **Example:** `\"2024-06-01T12:00:00.000000Z\"`\n- **Source:** Set automatically by Laravel's Eloquent ORM at the moment of insertion. You cannot set this manually.\n- **Immutable:** Yes\n- **Parsing in JavaScript:**\n  ```javascript\n  const date = new Date(category.created_at);\n  console.log(date.toLocaleDateString()); // e.g. \"6/1/2024\"\n  ```\n\n### `updated_at` — Detailed Explanation\n\n- **Type:** UTC timestamp string, ISO 8601 format\n- **Value immediately after creation:** Equals `created_at`\n- **Source:** Updated automatically by Laravel every time the record is saved\n\n### Full Response Example (with description)\n\n```json\n{\n  \"id\": 5,\n  \"name\": \"Electronics\",\n  \"description\": \"Gadgets, devices, and accessories including phones, laptops, and cameras.\",\n  \"created_at\": \"2024-06-01T12:00:00.000000Z\",\n  \"updated_at\": \"2024-06-01T12:00:00.000000Z\"\n}\n```\n\n### Full Response Example (without description)\n\n```json\n{\n  \"id\": 6,\n  \"name\": \"Books\",\n  \"description\": null,\n  \"created_at\": \"2024-06-01T12:05:00.000000Z\",\n  \"updated_at\": \"2024-06-01T12:05:00.000000Z\"\n}\n```\n\n---\n\n## HTTP Status Codes\n\n### 201 Created\n\n| Property | Value |\n| --- | --- |\n| **Code** | `201` |\n| **Meaning** | A new category was successfully created and stored in the database |\n| **When you see it** | The request body is valid, the server is running, and the database is reachable |\n\n**Example response:**\n```json\n{\n  \"id\": 5,\n  \"name\": \"Sports\",\n  \"description\": \"Outdoor and fitness equipment\",\n  \"created_at\": \"2024-06-01T12:00:00.000000Z\",\n  \"updated_at\": \"2024-06-01T12:00:00.000000Z\"\n}\n```\n\n**What to do:** Store the returned `id` if you need to reference this category in future requests.\n\n---\n\n### 422 Unprocessable Entity\n\n| Property | Value |\n| --- | --- |\n| **Code** | `422` |\n| **Meaning** | The request was well-formed but failed Laravel's validation rules |\n| **When you see it** | `name` is missing, empty, or not a string |\n\n**Example: missing `name` field**\n\nRequest body sent:\n```json\n{}\n```\n\nResponse:\n```json\n{\n  \"message\": \"The name field is required.\",\n  \"errors\": {\n    \"name\": [\n      \"The name field is required.\"\n    ]\n  }\n}\n```\n\n**Example: empty `name` field**\n\nRequest body sent:\n```json\n{\n  \"name\": \"\"\n}\n```\n\nResponse:\n```json\n{\n  \"message\": \"The name field is required.\",\n  \"errors\": {\n    \"name\": [\n      \"The name field is required.\"\n    ]\n  }\n}\n```\n\n**How to fix:**\n1. Read the `errors` object — each key is a field name, and the value is an array of error messages.\n2. Ensure `name` is present and is a non-empty string.\n3. Ensure `Content-Type: application/json` is set so Laravel parses the body correctly.\n4. Ensure the body is valid JSON (no trailing commas, all strings quoted).\n\n---\n\n### 404 Not Found\n\n| Property | Value |\n| --- | --- |\n| **Code** | `404` |\n| **Meaning** | The URL does not match any route registered in Laravel |\n| **When you see it** | URL typo or route not registered in `routes/api.php` |\n\n**Example response body (with `Accept: application/json`):**\n```json\n{\n  \"message\": \"Not Found\"\n}\n```\n\n**How to fix:**\n1. Verify the URL: `http://127.0.0.1:8000/api/categories`\n2. Check registered routes: `php artisan route:list`\n3. Clear route cache: `php artisan route:clear`\n\n---\n\n### 500 Internal Server Error\n\n| Property | Value |\n| --- | --- |\n| **Code** | `500` |\n| **Meaning** | The server encountered an unexpected error while processing the request |\n| **When you see it** | Database connection failure, PHP exception, missing table |\n\n**Common causes:**\n- The database server is not running\n- `.env` database credentials are incorrect\n- The `categories` table does not exist (migrations not run)\n- A PHP exception is thrown inside the controller\n\n**Example response body (with `APP_DEBUG=true`):**\n```json\n{\n  \"message\": \"SQLSTATE[HY000] [2002] Connection refused\",\n  \"exception\": \"Illuminate\\\\Database\\\\QueryException\",\n  \"file\": \"/var/www/app/vendor/laravel/framework/src/Illuminate/Database/Connection.php\",\n  \"line\": 760,\n  \"trace\": []\n}\n```\n\n**How to fix:**\n1. Confirm your database server is running.\n2. Check `.env` database credentials (`DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`).\n3. Run pending migrations: `php artisan migrate`\n4. Tail the log file: `tail -f storage/logs/laravel.log`\n5. Set `APP_DEBUG=true` in `.env` to get a full stack trace in the response.\n\n---\n\n## Usage Guidelines\n\n### Sending the Request from JavaScript (fetch)\n\n```javascript\nconst response = await fetch('http://127.0.0.1:8000/api/categories', {\n  method: 'POST',\n  headers: {\n    'Accept': 'application/json',\n    'Content-Type': 'application/json'\n  },\n  body: JSON.stringify({\n    name: 'Electronics',\n    description: 'Gadgets, devices, and accessories'\n  })\n});\n\nif (response.status === 422) {\n  const error = await response.json();\n  console.error('Validation failed:', error.errors);\n} else if (!response.ok) {\n  throw new Error(`HTTP error: ${response.status}`);\n} else {\n  const category = await response.json();\n  console.log('Created category with id:', category.id);\n}\n```\n\n### Saving the Returned `id`\n\nAfter a successful `201 Created` response, always save the `id` from the response body:\n\n```javascript\nconst category = await response.json();\nconst newCategoryId = category.id;\n// Use newCategoryId in future GET, PUT, DELETE requests\n```\n\nDo not assume what the `id` will be — always read it from the response.\n\n### Handling Validation Errors\n\n```javascript\nif (response.status === 422) {\n  const error = await response.json();\n  // error.errors is an object: { fieldName: [\"error message\", ...] }\n  Object.entries(error.errors).forEach(([field, messages]) => {\n    console.error(`${field}: ${messages.join(', ')}`);\n  });\n}\n```\n\n### Postman Test Scripts\n\nAdd these to the **Scripts → Post-response** tab to automatically validate the response:\n\n```javascript\npm.test('Status code is 201', function () {\n  pm.response.to.have.status(201);\n});\n\npm.test('Response is a JSON object', function () {\n  const body = pm.response.json();\n  pm.expect(body).to.be.an('object').and.not.an('array');\n});\n\npm.test('Response has id (number)', function () {\n  const body = pm.response.json();\n  pm.expect(body).to.have.property('id').that.is.a('number');\n});\n\npm.test('Response has name (string)', function () {\n  const body = pm.response.json();\n  pm.expect(body).to.have.property('name').that.is.a('string');\n});\n\npm.test('Response has created_at and updated_at', function () {\n  const body = pm.response.json();\n  pm.expect(body).to.have.property('created_at').that.is.a('string');\n  pm.expect(body).to.have.property('updated_at').that.is.a('string');\n});\n\npm.test('description is string or null', function () {\n  const body = pm.response.json();\n  const desc = body.description;\n  pm.expect(desc === null || typeof desc === 'string').to.be.true;\n});\n\n// Save the created id as an environment variable for use in other requests\nconst body = pm.response.json();\nif (body.id) {\n  pm.environment.set('category_id', body.id);\n  console.log('Saved category_id:', body.id);\n}\n```\n\n---\n\n## Prerequisites Checklist\n\n- [ ] Laravel server is running: `php artisan serve`\n- [ ] Database server is running and accessible\n- [ ] `.env` database credentials are correct\n- [ ] Migrations have been applied: `php artisan migrate`\n- [ ] `Accept: application/json` header is present and enabled\n- [ ] `Content-Type: application/json` header is present and enabled\n- [ ] Request body is valid JSON with a non-empty `name` field\n- [ ] Correct Postman environment is selected (if using `{{base_url}}`)"
+        "description": "## POST /api/categories — Створення нової категорії товарів\n\n### Технічний опис маршруту\n\nЦей ендпоінт реалізує операцію **Create (створення)** у CRUD-архітектурі. Його роль — прийняти дані нової категорії від клієнта, виконати їх валідацію, додати новий запис до локальної копії масиву `CATEGORIES` та повернути клієнту щойно створений об'єкт разом із повним знімком усіх категорій (`all_categories_snapshot`).\n\nУ Laravel цей маршрут обробляється методом `store(Request $request)` контролера `CategoryController`. Метод виконує такі кроки:\n1. Валідує вхідні дані через `$request->validate()`.\n2. Копіює константу `self::CATEGORIES` у локальну змінну `$categories`.\n3. Генерує новий `id` як `max(array_column($categories, 'id')) + 1`.\n4. Формує новий об'єкт категорії.\n5. Додає його до локального масиву `$categories`.\n6. Повертає відповідь з кодом `201 Created`, що містить новий об'єкт та повний знімок масиву.\n\n**Внутрішній PHP-код контролера (Laravel):**\n\n```php\npublic function store(Request $request): JsonResponse\n{\n    $validated = $request->validate([\n        'name' => 'required|string|max:255',\n        'description' => 'nullable|string|max:1000',\n    ]);\n\n    $categories = self::CATEGORIES;\n    $newId = max(array_column($categories, 'id')) + 1;\n\n    $newCategory = [\n        'id' => $newId,\n        'name' => $validated['name'],\n        'description' => $validated['description'] ?? null,\n    ];\n\n    $categories[] = $newCategory;\n\n    return response()->json([\n        'data' => $newCategory,\n        'all_categories_snapshot' => $categories,\n    ], 201);\n}\n```\n\n---\n\n### Маршрутизація (Routing) у Laravel\n\nМаршрут оголошений у файлі `routes/api.php`:\n\n```php\nRoute::post('/categories', [CategoryController::class, 'store']);\n```\n\n---\n\n### HTTP-метод та повний URL\n\n| Параметр | Значення |\n|----------|----------|\n| **HTTP-метод** | `POST` |\n| **Повний URL** | `http://127.0.0.1:8000/api/categories` |\n| **Метод контролера** | `CategoryController@store` |\n\n---\n\n### Заголовки запиту (Request Headers)\n\n| Заголовок | Значення | Обов'язковий | Детальне призначення |\n|-----------|----------|--------------|----------------------|\n| `Content-Type` | `application/json` | Так | Повідомляє Laravel, що тіло запиту передається у форматі JSON. Без цього заголовка `$request->input()` та `$request->validate()` не зможуть прочитати поля з тіла запиту. |\n| `Accept` | `application/json` | Так | Повідомляє Laravel, що клієнт очікує відповідь у форматі JSON. Без цього заголовка помилки валідації (422) можуть повертатися у форматі HTML. |\n\n---\n\n### Тіло запиту (Request Body)\n\nТіло запиту передається у форматі **JSON**.\n\n| Поле | Тип | Обов'язкове | Макс. довжина | Правила валідації | Опис |\n|------|-----|-------------|---------------|-------------------|------|\n| `name` | `string` | Так | 255 символів | `required`, `string`, `max:255` | Назва нової категорії товарів. Не може бути відсутнім або порожнім рядком. |\n| `description` | `string` | Ні | 1000 символів | `nullable`, `string`, `max:1000` | Текстовий опис категорії. Якщо не передано, зберігається як `null`. |\n\n**Приклад тіла запиту (з усіма полями):**\n\n```json\n{\n  \"name\": \"Спорт та відпочинок\",\n  \"description\": \"Спортивний інвентар, тренажери та товари для активного відпочинку на природі\"\n}\n```\n\n**Приклад тіла запиту (лише обов'язкове поле):**\n\n```json\n{\n  \"name\": \"Автотовари\"\n}\n```\n\n---\n\n### Приклад успішної відповіді\n\n**Статус:** `201 Created`\n\n```json\n{\n  \"data\": {\n    \"id\": 6,\n    \"name\": \"Спорт та відпочинок\",\n    \"description\": \"Спортивний інвентар, тренажери та товари для активного відпочинку на природі\"\n  },\n  \"all_categories_snapshot\": [\n    {\n      \"id\": 1,\n      \"name\": \"Електроніка\",\n      \"description\": \"Телефони, ноутбуки, планшети та інша електроніка\"\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Одяг\",\n      \"description\": \"Чоловічий, жіночий та дитячий одяг\"\n    },\n    {\n      \"id\": 3,\n      \"name\": \"Книги\",\n      \"description\": \"Художня та навчальна література\"\n    },\n    {\n      \"id\": 4,\n      \"name\": \"Спорт\",\n      \"description\": \"Спортивний інвентар та одяг для активного відпочинку\"\n    },\n    {\n      \"id\": 5,\n      \"name\": \"Дім та сад\",\n      \"description\": \"Товари для дому, саду та ремонту\"\n    },\n    {\n      \"id\": 6,\n      \"name\": \"Спорт та відпочинок\",\n      \"description\": \"Спортивний інвентар, тренажери та товари для активного відпочинку на природі\"\n    }\n  ]\n}\n```\n\n---\n\n### Приклад відповіді з помилкою — відсутнє поле `name`\n\n**Статус:** `400 Bad Request` або `422 Unprocessable Entity` (залежно від реалізації)\n\n```json\n{\n  \"error\": \"The 'name' field is required\"\n}\n```\n\nАбо у стандартному форматі Laravel validation errors:\n\n```json\n{\n  \"message\": \"The name field is required.\",\n  \"errors\": {\n    \"name\": [\n      \"The name field is required.\"\n    ]\n  }\n}\n```\n\n---\n\n### Приклад відповіді з помилкою — поле `name` перевищує максимальну довжину\n\n**Статус:** `400 Bad Request` або `422 Unprocessable Entity`\n\n```json\n{\n  \"message\": \"The name field must not be greater than 255 characters.\",\n  \"errors\": {\n    \"name\": [\n      \"The name field must not be greater than 255 characters.\"\n    ]\n  }\n}\n```\n\n---\n\n### Приклад відповіді з помилкою — неправильний HTTP-метод\n\n**Статус:** `405 Method Not Allowed`\n\n```json\n{\n  \"message\": \"The GET method is not supported for route api/categories. Supported methods: POST.\"\n}\n```\n\n---\n\n### Таблиця всіх можливих відповідей\n\n| Код | Статус | Умова | Тіло відповіді |\n|-----|--------|-------|----------------|\n| `201` | Created | Дані валідні, категорію успішно додано до локального масиву | Об'єкт нової категорії + `all_categories_snapshot` |\n| `400` | Bad Request | Поле `name` відсутнє або порожнє (при ручній валідації) | `{\"error\": \"The 'name' field is required\"}` |\n| `422` | Unprocessable Entity | Помилка валідації через `$request->validate()` | `{\"message\": \"...\", \"errors\": {...}}` |\n| `405` | Method Not Allowed | Використано неправильний HTTP-метод | `{\"message\": \"...\"}` |"
       },
-      "response": []
+      "response": [
+        {
+          "name": "201 Created — Категорію успішно створено",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Electronics\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories"
+              ]
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "{\n  \"message\": \"Category created successfully.\",\n  \"category\": {\"id\": 6, \"name\": \"Спорт та відпочинок\", \"description\": \"Спортивний інвентар, туристичне спорядження та товари для активного відпочинку\"},\n  \"all_categories_snapshot\": [\n    {\"id\": 1, \"name\": \"Електроніка\", \"description\": \"Смартфони, ноутбуки, планшети та інша електронна техніка\"},\n    {\"id\": 2, \"name\": \"Одяг\", \"description\": \"Чоловічий, жіночий та дитячий одяг усіх розмірів\"},\n    {\"id\": 3, \"name\": \"Взуття\", \"description\": \"Спортивне, повсякденне та святкове взуття для всієї родини\"},\n    {\"id\": 4, \"name\": \"Меблі\", \"description\": \"Меблі для дому, офісу та саду\"},\n    {\"id\": 5, \"name\": \"Продукти харчування\", \"description\": \"Свіжі та консервовані продукти, напої та снеки\"},\n    {\"id\": 6, \"name\": \"Спорт та відпочинок\", \"description\": \"Спортивний інвентар, туристичне спорядження та товари для активного відпочинку\"}\n  ]\n}"
+        },
+        {
+          "name": "422 Unprocessable Entity — Помилка валідації (name відсутній)",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Electronics\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories"
+              ]
+            }
+          },
+          "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+          "code": 422,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "{\n  \"message\": \"The name field is required.\",\n  \"errors\": {\n    \"name\": [\"The name field is required.\"]\n  }\n}"
+        },
+        {
+          "name": "422 Unprocessable Entity — Помилка валідації (name задовгий)",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Electronics\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories"
+              ]
+            }
+          },
+          "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+          "code": 422,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "{\n  \"message\": \"The name field must not be greater than 255 characters.\",\n  \"errors\": {\n    \"name\": [\"The name field must not be greater than 255 characters.\"]\n  }\n}"
+        },
+        {
+          "name": "405 Method Not Allowed — Недозволений метод",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Electronics\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories"
+              ]
+            }
+          },
+          "status": "Method Not Allowed",
+          "code": 405,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "{\"message\": \"The GET method is not supported for route api/categories. Supported methods: POST.\"}"
+        }
+      ]
     },
     {
       "name": "Single Category",
@@ -154,9 +414,125 @@
             "categories",
             "1"
           ]
-        }
+        },
+        "description": "## GET /api/categories/{id} — Отримання однієї категорії за ідентифікатором\n\n### Технічний опис маршруту\n\nЦей ендпоінт реалізує операцію **Read (читання одного запису)** у CRUD-архітектурі. Його роль — знайти та повернути конкретну категорію товарів за її унікальним числовим ідентифікатором `id`. Пошук виконується у константному масиві `CATEGORIES` за допомогою PHP-функції `array_filter()` або циклу `foreach`.\n\nУ Laravel цей маршрут обробляється методом `show($id)` контролера `CategoryController`. Метод отримує `$id` з параметра шляху, виконує пошук у масиві `self::CATEGORIES`, і якщо категорію знайдено — повертає її через `response()->json()` зі статусом `200 OK`. Якщо категорію не знайдено — повертає відповідь з кодом `404 Not Found`.\n\n**Внутрішній PHP-код контролера (Laravel):**\n\n```php\npublic function show(int $id): JsonResponse\n{\n    $categories = self::CATEGORIES;\n    $category = collect($categories)->firstWhere('id', $id);\n\n    if (!$category) {\n        return response()->json(['error' => 'Category not found'], 404);\n    }\n\n    return response()->json($category, 200);\n}\n```\n\n---\n\n### Маршрутизація (Routing) у Laravel\n\nМаршрут оголошений у файлі `routes/api.php`:\n\n```php\nRoute::get('/categories/{id}', [CategoryController::class, 'show']);\n```\n\nLaravel автоматично витягує значення `{id}` з URL і передає його як аргумент у метод `show($id)`. Параметр `{id}` є обов'язковим — без нього маршрут не буде знайдений.\n\n---\n\n### HTTP-метод та повний URL\n\n| Параметр | Значення |\n|----------|----------|\n| **HTTP-метод** | `GET` |\n| **Повний URL** | `http://127.0.0.1:8000/api/categories/{id}` |\n| **Приклад URL** | `http://127.0.0.1:8000/api/categories/1` |\n| **Метод контролера** | `CategoryController@show` |\n\n---\n\n### Параметри шляху (Path Parameters)\n\n| Параметр | Тип | Обов'язковий | Опис | Приклад |\n|----------|-----|--------------|------|---------|\n| `id` | `integer` | Так | Унікальний числовий ідентифікатор категорії. Повинен відповідати значенню поля `id` одного з елементів масиву `CATEGORIES`. | `1`, `2`, `3` |\n\n---\n\n### Заголовки запиту (Request Headers)\n\n| Заголовок | Значення | Обов'язковий | Детальне призначення |\n|-----------|----------|--------------|----------------------|\n| `Accept` | `application/json` | Так | Інформує Laravel, що клієнт очікує відповідь у форматі JSON. Критично важливо для коректного отримання JSON-відповіді при помилці 404. |\n\n### Заголовки відповіді (Response Headers)\n\n| Заголовок | Значення | Призначення |\n|-----------|----------|-------------|\n| `Content-Type` | `application/json; charset=UTF-8` | Вказує формат тіла відповіді. |\n\n---\n\n### Тіло запиту (Request Body)\n\nЦей ендпоінт **не приймає** тіла запиту. Єдиний вхідний параметр — `id` у шляху URL.\n\n---\n\n### Приклад успішної відповіді\n\n**Статус:** `200 OK`\n\n```json\n{\n  \"id\": 1,\n  \"name\": \"Електроніка\",\n  \"description\": \"Телефони, ноутбуки, планшети та інша електроніка\"\n}\n```\n\n---\n\n### Приклад відповіді з помилкою — категорію не знайдено\n\n**Статус:** `404 Not Found`\n\nЦя помилка виникає, коли у масиві `CATEGORIES` не існує елемента з полем `id`, що дорівнює переданому значенню в URL.\n\n```json\n{\n  \"error\": \"Category not found\"\n}\n```\n\n---\n\n### Приклад відповіді з помилкою — неправильний HTTP-метод\n\n**Статус:** `405 Method Not Allowed`\n\n```json\n{\n  \"message\": \"The POST method is not supported for route api/categories/{id}. Supported methods: GET, HEAD.\"\n}\n```\n\n---\n\n### Таблиця всіх можливих відповідей\n\n| Код | Статус | Умова | Тіло відповіді |\n|-----|--------|-------|----------------|\n| `200` | OK | Категорія з вказаним `id` знайдена в масиві `CATEGORIES` | Об'єкт категорії |\n| `404` | Not Found | Категорія з вказаним `id` відсутня в масиві `CATEGORIES` | `{\"error\": \"Category not found\"}` |\n| `405` | Method Not Allowed | Використано неправильний HTTP-метод | `{\"message\": \"...\"}` |"
       },
-      "response": []
+      "response": [
+        {
+          "name": "200 OK — Категорія знайдена (id=1)",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories/1",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories",
+                "1"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "{\"id\": 1, \"name\": \"Електроніка\", \"description\": \"Смартфони, ноутбуки, планшети та інша електронна техніка\"}"
+        },
+        {
+          "name": "404 Not Found — Категорія не існує (id=99)",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories/1",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories",
+                "1"
+              ]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "{\"message\": \"Category with id 99 not found.\"}"
+        },
+        {
+          "name": "405 Method Not Allowed — Недозволений метод",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories/1",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories",
+                "1"
+              ]
+            }
+          },
+          "status": "Method Not Allowed",
+          "code": 405,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "{\"message\": \"The POST method is not supported for route api/categories/{id}. Supported methods: GET, HEAD, PUT, PATCH, DELETE.\"}"
+        }
+      ]
     },
     {
       "name": "Update Category",
@@ -178,9 +554,163 @@
             "categories",
             "1"
           ]
-        }
+        },
+        "description": "## PATCH /api/categories/{id} — Часткове оновлення категорії товарів\n\n### Технічний опис маршруту\n\nЦей ендпоінт реалізує операцію **Update (оновлення)** у CRUD-архітектурі. Метод `PATCH` використовується для **часткового** оновлення ресурсу — клієнт може передати лише ті поля, які потрібно змінити, не зачіпаючи інші. На відміну від `PUT`, який вимагає передачі повного об'єкта, `PATCH` дозволяє оновити лише одне поле.\n\nУ Laravel цей маршрут обробляється методом `update(Request $request, int $id)` контролера `CategoryController`. Метод виконує такі кроки:\n1. Копіює константу `self::CATEGORIES` у локальну змінну `$categories`.\n2. Шукає елемент з відповідним `id` у масиві.\n3. Якщо елемент не знайдено — повертає `404 Not Found`.\n4. Валідує вхідні дані (поля необов'язкові, але якщо передані — мають відповідати правилам).\n5. Оновлює знайдений елемент у локальному масиві.\n6. Повертає відповідь з кодом `200 OK`, що містить оновлений об'єкт та повний знімок масиву.\n\n**Внутрішній PHP-код контролера (Laravel):**\n\n```php\npublic function update(Request $request, int $id): JsonResponse\n{\n    $categories = self::CATEGORIES;\n    $index = null;\n\n    foreach ($categories as $key => $category) {\n        if ($category['id'] === $id) {\n            $index = $key;\n            break;\n        }\n    }\n\n    if ($index === null) {\n        return response()->json(['error' => 'Category not found'], 404);\n    }\n\n    $validated = $request->validate([\n        'name' => 'sometimes|string|max:255|min:1',\n        'description' => 'sometimes|nullable|string|max:1000',\n    ]);\n\n    $categories[$index] = array_merge($categories[$index], $validated);\n\n    return response()->json([\n        'data' => $categories[$index],\n        'all_categories_snapshot' => $categories,\n    ], 200);\n}\n```\n\n---\n\n### Маршрутизація (Routing) у Laravel\n\nМаршрут оголошений у файлі `routes/api.php`:\n\n```php\nRoute::patch('/categories/{id}', [CategoryController::class, 'update']);\n```\n\n---\n\n### HTTP-метод та повний URL\n\n| Параметр | Значення |\n|----------|----------|\n| **HTTP-метод** | `PATCH` |\n| **Повний URL** | `http://127.0.0.1:8000/api/categories/{id}` |\n| **Приклад URL** | `http://127.0.0.1:8000/api/categories/1` |\n| **Метод контролера** | `CategoryController@update` |\n\n---\n\n### Параметри шляху (Path Parameters)\n\n| Параметр | Тип | Обов'язковий | Опис |\n|----------|-----|--------------|------|\n| `id` | `integer` | Так | Унікальний числовий ідентифікатор категорії, яку потрібно оновити. |\n\n---\n\n### Заголовки запиту (Request Headers)\n\n| Заголовок | Значення | Обов'язковий | Детальне призначення |\n|-----------|----------|--------------|----------------------|\n| `Content-Type` | `application/json` | Так | Повідомляє Laravel, що тіло запиту передається у форматі JSON. |\n| `Accept` | `application/json` | Так | Повідомляє Laravel, що клієнт очікує відповідь у форматі JSON. |\n\n---\n\n### Тіло запиту (Request Body)\n\nТіло запиту передається у форматі **JSON**. Усі поля є необов'язковими — достатньо передати лише ті, що потрібно змінити.\n\n| Поле | Тип | Обов'язкове | Макс. довжина | Правила валідації | Опис |\n|------|-----|-------------|---------------|-------------------|------|\n| `name` | `string` | Ні | 255 символів | `sometimes`, `string`, `max:255`, `min:1` | Нова назва категорії. Якщо передано — не може бути порожнім рядком. |\n| `description` | `string` або `null` | Ні | 1000 символів | `sometimes`, `nullable`, `string`, `max:1000` | Новий опис категорії. Можна передати `null` для очищення поля. |\n\n**Приклад тіла запиту (оновлення лише назви):**\n\n```json\n{\n  \"name\": \"Побутова техніка\"\n}\n```\n\n**Приклад тіла запиту (оновлення обох полів):**\n\n```json\n{\n  \"name\": \"Побутова техніка\",\n  \"description\": \"Холодильники, пральні машини, мікрохвильові печі та інша побутова техніка\"\n}\n```\n\n---\n\n### Приклад успішної відповіді\n\n**Статус:** `200 OK`\n\n```json\n{\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Побутова техніка\",\n    \"description\": \"Холодильники, пральні машини, мікрохвильові печі та інша побутова техніка\"\n  },\n  \"all_categories_snapshot\": [\n    {\n      \"id\": 1,\n      \"name\": \"Побутова техніка\",\n      \"description\": \"Холодильники, пральні машини, мікрохвильові печі та інша побутова техніка\"\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Одяг\",\n      \"description\": \"Чоловічий, жіночий та дитячий одяг\"\n    },\n    {\n      \"id\": 3,\n      \"name\": \"Книги\",\n      \"description\": \"Художня та навчальна література\"\n    },\n    {\n      \"id\": 4,\n      \"name\": \"Спорт\",\n      \"description\": \"Спортивний інвентар та одяг для активного відпочинку\"\n    },\n    {\n      \"id\": 5,\n      \"name\": \"Дім та сад\",\n      \"description\": \"Товари для дому, саду та ремонту\"\n    }\n  ]\n}\n```\n\n---\n\n### Приклад відповіді з помилкою — категорію не знайдено\n\n**Статус:** `404 Not Found`\n\n```json\n{\n  \"error\": \"Category not found\"\n}\n```\n\n---\n\n### Приклад відповіді з помилкою — порожнє поле `name`\n\n**Статус:** `422 Unprocessable Entity`\n\n```json\n{\n  \"message\": \"The name field must be at least 1 character.\",\n  \"errors\": {\n    \"name\": [\n      \"The name field must be at least 1 character.\"\n    ]\n  }\n}\n```\n\n---\n\n### Приклад відповіді з помилкою — неправильний HTTP-метод\n\n**Статус:** `405 Method Not Allowed`\n\n```json\n{\n  \"message\": \"The PUT method is not supported for route api/categories/{id}. Supported methods: PATCH.\"\n}\n```\n\n---\n\n### Таблиця всіх можливих відповідей\n\n| Код | Статус | Умова | Тіло відповіді |\n|-----|--------|-------|----------------|\n| `200` | OK | Категорію знайдено та успішно оновлено | Оновлений об'єкт + `all_categories_snapshot` |\n| `404` | Not Found | Категорія з вказаним `id` відсутня в масиві | `{\"error\": \"Category not found\"}` |\n| `422` | Unprocessable Entity | Передане поле `name` є порожнім рядком | `{\"message\": \"...\", \"errors\": {...}}` |\n| `405` | Method Not Allowed | Використано PUT замість PATCH або інший неправильний метод | `{\"message\": \"...\"}` |"
       },
-      "response": []
+      "response": [
+        {
+          "name": "200 OK — Категорію успішно оновлено (id=1)",
+          "originalRequest": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories/1",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories",
+                "1"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "{\n  \"message\": \"Category updated successfully.\",\n  \"category\": {\"id\": 1, \"name\": \"Електроніка та гаджети\", \"description\": \"Смартфони, ноутбуки, планшети та інша електронна техніка\"},\n  \"all_categories_snapshot\": [\n    {\"id\": 1, \"name\": \"Електроніка та гаджети\", \"description\": \"Смартфони, ноутбуки, планшети та інша електронна техніка\"},\n    {\"id\": 2, \"name\": \"Одяг\", \"description\": \"Чоловічий, жіночий та дитячий одяг усіх розмірів\"},\n    {\"id\": 3, \"name\": \"Взуття\", \"description\": \"Спортивне, повсякденне та святкове взуття для всієї родини\"},\n    {\"id\": 4, \"name\": \"Меблі\", \"description\": \"Меблі для дому, офісу та саду\"},\n    {\"id\": 5, \"name\": \"Продукти харчування\", \"description\": \"Свіжі та консервовані продукти, напої та снеки\"}\n  ]\n}"
+        },
+        {
+          "name": "404 Not Found — Категорія не існує (id=99)",
+          "originalRequest": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories/1",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories",
+                "1"
+              ]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "{\"message\": \"Category with id 99 not found.\"}"
+        },
+        {
+          "name": "422 Unprocessable Entity — Помилка валідації (name порожній рядок)",
+          "originalRequest": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories/1",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories",
+                "1"
+              ]
+            }
+          },
+          "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+          "code": 422,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "{\n  \"message\": \"The name field must be at least 1 character.\",\n  \"errors\": {\n    \"name\": [\"The name field must be at least 1 character.\"]\n  }\n}"
+        },
+        {
+          "name": "405 Method Not Allowed — Недозволений метод",
+          "originalRequest": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories/1",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories",
+                "1"
+              ]
+            }
+          },
+          "status": "Method Not Allowed",
+          "code": 405,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "{\"message\": \"The PUT method is not supported for route api/categories/{id}. Supported methods: GET, HEAD, PATCH, DELETE.\"}"
+        }
+      ]
     },
     {
       "name": "Delete Category",
@@ -202,9 +732,125 @@
             "categories",
             "1"
           ]
-        }
+        },
+        "description": "## DELETE /api/categories/{id} — Видалення категорії товарів\n\n### Технічний опис маршруту\n\nЦей ендпоінт реалізує операцію **Delete (видалення)** у CRUD-архітектурі. Його роль — знайти категорію за ідентифікатором у константному масиві `CATEGORIES`, видалити її з локальної копії масиву та повернути підтвердження операції разом із повним знімком масиву після видалення (`all_categories_snapshot`). Операція є незворотною в межах одного запиту — оскільки дані зберігаються у константі, після завершення запиту масив повертається до початкового стану.\n\nУ Laravel цей маршрут обробляється методом `destroy(int $id)` контролера `CategoryController`. Метод виконує такі кроки:\n1. Копіює константу `self::CATEGORIES` у локальну змінну `$categories`.\n2. Шукає елемент з відповідним `id`.\n3. Якщо елемент не знайдено — повертає `404 Not Found`.\n4. Видаляє елемент з локального масиву за допомогою `array_filter()` або `unset()`.\n5. Повертає відповідь з кодом `200 OK` та повним знімком масиву після видалення.\n\n**Внутрішній PHP-код контролера (Laravel):**\n\n```php\npublic function destroy(int $id): JsonResponse\n{\n    $categories = self::CATEGORIES;\n    $found = false;\n\n    foreach ($categories as $key => $category) {\n        if ($category['id'] === $id) {\n            $found = true;\n            unset($categories[$key]);\n            break;\n        }\n    }\n\n    if (!$found) {\n        return response()->json(['error' => 'Category not found'], 404);\n    }\n\n    $snapshot = array_values($categories);\n\n    return response()->json([\n        'message' => 'Category deleted successfully',\n        'all_categories_snapshot' => $snapshot,\n    ], 200);\n}\n```\n\n---\n\n### Маршрутизація (Routing) у Laravel\n\nМаршрут оголошений у файлі `routes/api.php`:\n\n```php\nRoute::delete('/categories/{id}', [CategoryController::class, 'destroy']);\n```\n\n---\n\n### HTTP-метод та повний URL\n\n| Параметр | Значення |\n|----------|----------|\n| **HTTP-метод** | `DELETE` |\n| **Повний URL** | `http://127.0.0.1:8000/api/categories/{id}` |\n| **Приклад URL** | `http://127.0.0.1:8000/api/categories/1` |\n| **Метод контролера** | `CategoryController@destroy` |\n\n---\n\n### Параметри шляху (Path Parameters)\n\n| Параметр | Тип | Обов'язковий | Опис |\n|----------|-----|--------------|------|\n| `id` | `integer` | Так | Унікальний числовий ідентифікатор категорії, яку потрібно видалити. |\n\n---\n\n### Заголовки запиту (Request Headers)\n\n| Заголовок | Значення | Обов'язковий | Детальне призначення |\n|-----------|----------|--------------|----------------------|\n| `Accept` | `application/json` | Так | Повідомляє Laravel, що клієнт очікує відповідь у форматі JSON. |\n\n---\n\n### Тіло запиту (Request Body)\n\nЦей ендпоінт **не приймає** тіла запиту. Єдиний вхідний параметр — `id` у шляху URL.\n\n---\n\n### Приклад успішної відповіді\n\n**Статус:** `200 OK`\n\n```json\n{\n  \"message\": \"Category deleted successfully\",\n  \"all_categories_snapshot\": [\n    {\n      \"id\": 2,\n      \"name\": \"Одяг\",\n      \"description\": \"Чоловічий, жіночий та дитячий одяг\"\n    },\n    {\n      \"id\": 3,\n      \"name\": \"Книги\",\n      \"description\": \"Художня та навчальна література\"\n    },\n    {\n      \"id\": 4,\n      \"name\": \"Спорт\",\n      \"description\": \"Спортивний інвентар та одяг для активного відпочинку\"\n    },\n    {\n      \"id\": 5,\n      \"name\": \"Дім та сад\",\n      \"description\": \"Товари для дому, саду та ремонту\"\n    }\n  ]\n}\n```\n\n---\n\n### Приклад відповіді з помилкою — категорію не знайдено\n\n**Статус:** `404 Not Found`\n\n```json\n{\n  \"error\": \"Category not found\"\n}\n```\n\n---\n\n### Приклад відповіді з помилкою — неправильний HTTP-метод\n\n**Статус:** `405 Method Not Allowed`\n\n```json\n{\n  \"message\": \"The GET method is not supported for route api/categories/{id}. Supported methods: DELETE.\"\n}\n```\n\n---\n\n### Таблиця всіх можливих відповідей\n\n| Код | Статус | Умова | Тіло відповіді |\n|-----|--------|-------|----------------|\n| `200` | OK | Категорію знайдено та успішно видалено з локального масиву | `{\"message\": \"Category deleted successfully\", \"all_categories_snapshot\": [...]}` |\n| `404` | Not Found | Категорія з вказаним `id` відсутня в масиві `CATEGORIES` | `{\"error\": \"Category not found\"}` |\n| `405` | Method Not Allowed | Використано неправильний HTTP-метод | `{\"message\": \"...\"}` |"
       },
-      "response": []
+      "response": [
+        {
+          "name": "200 OK — Категорію успішно видалено (id=1)",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories/1",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories",
+                "1"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "{\n  \"message\": \"Category deleted successfully.\",\n  \"deleted_category\": {\"id\": 1, \"name\": \"Електроніка\", \"description\": \"Смартфони, ноутбуки, планшети та інша електронна техніка\"},\n  \"all_categories_snapshot\": [\n    {\"id\": 2, \"name\": \"Одяг\", \"description\": \"Чоловічий, жіночий та дитячий одяг усіх розмірів\"},\n    {\"id\": 3, \"name\": \"Взуття\", \"description\": \"Спортивне, повсякденне та святкове взуття для всієї родини\"},\n    {\"id\": 4, \"name\": \"Меблі\", \"description\": \"Меблі для дому, офісу та саду\"},\n    {\"id\": 5, \"name\": \"Продукти харчування\", \"description\": \"Свіжі та консервовані продукти, напої та снеки\"}\n  ]\n}"
+        },
+        {
+          "name": "404 Not Found — Категорія не існує (id=99)",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories/1",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories",
+                "1"
+              ]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "{\"message\": \"Category with id 99 not found.\"}"
+        },
+        {
+          "name": "405 Method Not Allowed — Недозволений метод",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/categories/1",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories",
+                "1"
+              ]
+            }
+          },
+          "status": "Method Not Allowed",
+          "code": 405,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "cookie": [],
+          "body": "{\"message\": \"The POST method is not supported for route api/categories/{id}. Supported methods: GET, HEAD, PATCH, DELETE.\"}"
+        }
+      ]
     }
   ]
 }
