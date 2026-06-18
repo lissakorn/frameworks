@@ -10,19 +10,20 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api/categories')]
 class CategoryController extends AbstractController
 {
+   
+    private const CATEGORIES = [
+        ['id' => 1, 'name' => 'Електроніка'],
+        ['id' => 2, 'name' => 'Одяг']
+    ];
 
     #[Route('', name: 'category_index', methods: ['GET'])]
     public function index(): JsonResponse
     {
         return $this->json([
             'message' => 'Список категорій',
-            'data' => [
-                ['id' => 1, 'name' => 'Електроніка'],
-                ['id' => 2, 'name' => 'Одяг']
-            ]
+            'data' => self::CATEGORIES 
         ]);
     }
-
 
     #[Route('', name: 'category_store', methods: ['POST'])]
     public function store(Request $request): JsonResponse
@@ -41,7 +42,6 @@ class CategoryController extends AbstractController
         ]);
     }
 
-   
     #[Route('/{id}', name: 'category_update', methods: ['PUT', 'PATCH'])]
     public function update(int $id, Request $request): JsonResponse
     {
@@ -50,7 +50,6 @@ class CategoryController extends AbstractController
             'id' => $id
         ]);
     }
-
 
     #[Route('/{id}', name: 'category_delete', methods: ['DELETE'])]
     public function destroy(int $id): JsonResponse
